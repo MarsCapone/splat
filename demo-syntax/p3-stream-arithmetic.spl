@@ -1,9 +1,0 @@
-{{
-    Take two sequences a1 a2 a3 a4 . . . and b1 b2 b3 b4 . . ., and produce the sequence a1 + 3b1 a2 + 3b2 a3 + 3b3 a4 + 3b4 . . .
-}}
-
-stream-arithmetic { splat | =   {{ new function that takes a stream }}
-    a, b = next splat           {{ a, b are what you get on splitting the first
-                                    line of the stream on spaces. a is the
-                                    first element, b is everything else }}
-    show a plus 3 times b}      {{ show a + 3b }}

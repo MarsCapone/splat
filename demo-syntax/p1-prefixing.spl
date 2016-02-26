@@ -1,7 +1,0 @@
-{{
-    Take a sequence a1 a2 a3 a4 a5 . . . as an input and output the sequence 0 a1 a2 a3 . . ., that is, the sequence that is the same as the input sequence, but starting with a single 0 character.
-}}
-
-prefixer { splat | =            {{ new function prefixer which takes a stream}}
-    @before { show 0 }          {{ runs once }}
-    show next splat}            {{ show next value in stream }}
