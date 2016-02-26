@@ -1,0 +1,21 @@
+type:
+    number string list stream boolean function
+
+operators:
+    + - = / < > * | & || && ==
+    ( ) ^ % <= >= ! !=
+
+expr:
+    then
+    if (expr) { expr } else { expr }
+    if (expr) { expr }
+    for (decl comp func) { expr }
+
+decl:
+    type ident = expr
+
+ident:
+    a-z A-Z 0-9 _
+
+func:
+    type ident (...) { expr }
