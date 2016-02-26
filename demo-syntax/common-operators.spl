@@ -1,0 +1,36 @@
+1 add 2                     ===> 3
+
+1 minus 2                   ===> -1
+
+1 divided by 2              ===> 0.5
+
+1 times 2                   ===> 2
+
+2 plusplus                  ===> 3
+
+{{ comments }}
+
+3 is equal to 3             ===> truth
+3 is equal to 4             ===> falsehood
+
+truth and falsehood         ===> falsehood
+truth or falsehood          ===> truth
+
+4 modulo 2                  ===> 0
+4 modulo 3                  ===> 1
+4 divides 2                 ===> truth
+
+not truth                   ===> falsehood
+
+x equals not truth          ===> variable 'x' is equal to falsehood
+x equals 3                  ===> variable 'x' is equal to 3
+x plusplus                  ===> variable 'x' is incremented by 1
+
+[1, 2, 3]                   ===> list containing 1, 2, 3
+
+count{list| =
+    x = 0
+    for i in list {
+        x equals x add 1
+    }
+    return x}               ===> example function for counting

@@ -1,0 +1,9 @@
+{{
+    Take a sequence a1 a2 a3 a4 a5 . . . as an input and output two copies of it.
+}}
+
+copying{ splat | =                  {{ new function copying which takes a
+                                        stream}}
+    x = next splat                  {{ assign x as the next value fof the
+                                        stream}}
+    show x, x}                      {{ show the next value of the splat twice }}
