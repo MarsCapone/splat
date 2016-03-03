@@ -1,5 +1,5 @@
 function stream fizzbuzz (stream splat) = {
-    for (int s) in splat {
+    for (number s) in splat {
         if s % 3 == 0 and s % 5 == 0 {
             show 'fizzbuzz'¬
         } else {
@@ -17,7 +17,7 @@ function stream fizzbuzz (stream splat) = {
 }
 
 function stream fizzbuzz_switch (stream splat) = {
-    for (int s) in splat {
+    for (number s) in splat {
         switch s {
             s % 3 == 0 and s % 5 == 0 {
                 show 'fizzbuzz'¬
@@ -33,7 +33,7 @@ function stream fizzbuzz_switch (stream splat) = {
     }
 }
 
-function string one_fizzbuzz (integer s) = {
+function string one_fizzbuzz (number s) = {
     switch s {
         s%3==0 and s%5==0 {
             return 'fizzbuzz'¬
@@ -48,7 +48,7 @@ function string one_fizzbuzz (integer s) = {
     }
 
 function stream fizzbuzz_other (stream splat) = {
-    for (int s) in splat {
+    for (number s) in splat {
         show (one_fizzbuzz s)¬
     }
 }
