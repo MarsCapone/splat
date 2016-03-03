@@ -55,3 +55,42 @@ type_spec:
     | STREAM_TYPE       { splatStream }
     | FUNCTION_TYPE     { splatFunction }
     | LPAREN type_spec RPAREN { $2 }
+;
+
+boolean_expr:
+    TRUE                                    { splBoolean true }
+    | FALSE                                 { splBoolean false }
+    | boolean_expr AND boolean_expr         { splAnd ($1, $3) }
+    | boolean_expr OR boolean_expr          { splOr ($1, $3) }
+    | NOT boolean_expr                      { splNot $2 }
+    | comparator_expr
+;
+
+comparator_expr:
+    math_expr LESS_THAN_EQUAL math_expr     { splLe ($1, $3) }
+    math_expr GREATER_THAN_EQUAL math_expr  { splGe ($1, $3) }
+;
+
+math_expr:
+    NUMBER                                  { splNum $1 }
+    | math_expr DIVIDE math_expr            { splDivide ($1, $3) }
+    | math_expr MULTIPLY math_expr          { splTimes ($1, $3) }
+    | math_expr MINUS math_expr             { splMinus ($1, $3) }
+    | math_expr PLUS math_expr              { splPlus ($1, $3) }
+    | math_expr MODULO math_expr            { splModulo ($1, $3) }
+    | math_expr POWER_OF math_expr          { splPower ($1, $3) }
+;
+
+switch_contents_expr:
+(* Not sure if this is right, but how else to do it? *)
+    comparator_expr SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT switch_contents_expr { splIf ($1, $3) }
+    | SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT       { $2 }
+
+flow_expr:
+    FOR expr IN expr SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT { splFor ($2, $4, $6)}
+    | FOREVER SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT     { splForever $3 }
+    | WHILE expr SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  { splWhile ($2, $4) }
+    | IF expr SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT ELSE SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT      { splIfElse ($2, $4, $8) }
+    | IF expr SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT       { splIf ($2, $4) }
+    | SWITCH expr SCOPE_BRACE_LEFT switch_contents_expr SCOPE_BRACE_RIGHT   { splSwitch ($2, $4) }
+;

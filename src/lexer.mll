@@ -6,7 +6,7 @@ rule white_space = parse
     [' ' '\t']     { white_space lexbuf }     (* skip blanks *)
 
 rule variables = parse
-    (\d*[.])?\d+ as lsm { NUMBER(float_of_string lxm) }
+    '-'?('\d'*[.])?'\d'+ as lsm { NUMBER(float_of_string lxm) }
     | [a-zA-Z\d]+ as lxm { IDENT(lxm) }
 
 rule types = parse
