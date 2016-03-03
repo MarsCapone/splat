@@ -1,9 +1,9 @@
-function task3 (stream splat) = {
+function stream task3 (stream splat) = {
     for (string s) in splat {
-        (int a), (int b) = s
-        show (a + 3 * b)
+        (int a), (int b) = s¬
+        show (a + 3 * b)¬
     }
 }
 
-task3
+task3 stdin¬
 
