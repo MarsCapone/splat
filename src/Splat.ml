@@ -14,17 +14,18 @@ type splatTerm =
     | splNumber of float 
     | splBoolean of bool
     | splString of string
-    | splList of List
+    | splList of list
     | splStream of Stream 
     | splVariable of string
-(* operators *)    
+(* number operators *)    
     | splAdd of splatTerm * splatTerm 
     | splMinus of splatTerm * splatTerm 
     | splTimes of splatTerm * splatTerm 
     | splDivide of splatTerm * splatTerm 
     | splModulo of splatTerm * splatTerm
     | splPower of splatTerm * splatTerm 
-    | splNot of splatTerm * splatTerm 
+(* boolean operators *)
+    | splNot of splatTerm 
     | splAnd of splatTerm * splatTerm 
     | splOr of splatTerm * splatTerm
 (* flow *)
@@ -39,11 +40,11 @@ type splatTerm =
     | splEq of splatTerm * splatTerm
     | splNe of splatTerm * splatTerm
 (* assignment *)
-    | splAssign of splatTerm * splatTerm 
-    | splPlusAssign of splatTerm * splatTerm 
-    | splMinusAssign of splatTerm * splatTerm 
-    | splTimesAssign of splatTerm * splatTerm
-    | splDivideAssign of splatTerm * splatTerm 
+    | splAssign of string * splatTerm 
+    | splPlusAssign of string * splatTerm 
+    | splMinusAssign of string * splatTerm 
+    | splTimesAssign of string * splatTerm
+    | splDivideAssign of string * splatTerm 
 (* predefined functions *)
     | splShow of splatTerm 
     | splRange of splatTerm * splatTerm * splatTerm 
