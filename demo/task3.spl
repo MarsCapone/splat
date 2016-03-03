@@ -1,6 +1,6 @@
 function stream task3 (stream splat) = {
     for (string s) in splat {
-        (int a), (int b) = s¬
+        (number a), (number b) = s¬
         show (a + 3 * b)¬
     }
 }

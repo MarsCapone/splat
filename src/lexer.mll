@@ -15,6 +15,7 @@ rule types = parse
     | "string"    { STRING_TYPE }
     | "stream"    { STREAM_TYPE }
     | "list"      { LIST_TYPE }
+    | "function"  { FUNCTION_TYPE }
 
 rule flow = parse
     "function"  { FUNCTION }
