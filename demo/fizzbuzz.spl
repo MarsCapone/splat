@@ -1,0 +1,36 @@
+function fizzbuzz (stream splat) = {
+    for (int s) in splat {
+        if s % 3 == 0 and s % 5 == 0 {
+            show 'fizzbuzz'
+        } else {
+            if s % 3 == 0 {
+                show 'fizz'
+            } else {
+                if s % 5 == 0 {
+                    show 'buzz'
+                } else {
+                    show s
+                }
+            }
+        }
+    }
+}
+
+function fizzbuzz_switch (stream splat) = {
+    for (int s) in splat {
+        switch s {
+            s % 3 == 0 and s % 5 == 0 {
+                show 'fizzbuzz'
+            } 
+            s % 3 == 0 {
+                show 'fizz'
+            }
+            s % 5 == 0 {
+                show 'buzz'
+            }
+            { show s }
+        }
+    }
+}
+
+fizzbuzz_switch
