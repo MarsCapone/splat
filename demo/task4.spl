@@ -1,9 +1,9 @@
 function task4 (stream splat) = {
-    ((int a) = 0) {  
+    (int a = 0) {  
         for (int s) in splat {
             show (s + a)
             a += s
-        }   
+        }
     }
 }
 
