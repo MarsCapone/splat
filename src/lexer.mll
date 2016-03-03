@@ -3,12 +3,14 @@
 open Parser        (* The type token is defined in parser.mli *)
 }
 rule lexer_main = parse
-      [' ' '\t' '\n']     { lexer_main lexbuf }     (* skip blanks *)
-    | ['0'-'9']+ as lxm { INT(int_of_string lxm) }
-    | "Bool"   { BTYPE }
-    | "Int"    { ITYPE }
-    | "->"     { FUNTYPE }
-    | "let"    { LET }
+      [' ' '\t']     { lexer_main lexbuf }     (* skip blanks *)
+    | (\d*[.])?\d+ as lsm { NUMBER(float_of_string lxm) }
+    | "boolean"   { BOOLEAN_TYPE }
+    | "number"    { NUMBER_TYPE }
+    | "string"    { STRING_TYPE }
+    | "stream"    { STREAM_TYPE }
+    | "function"  { FUNCTION }
+    | "for"       { FOR }
     | "in"     { IN }
     | "if"     { IF }
     | "then"   { THEN }
@@ -17,10 +19,28 @@ rule lexer_main = parse
     | "false"  { FALSE }
     | ['a'-'z']+ as lxm { IDENT(lxm) }
     | '+'      { PLUS }
-    | '<'      { LESSTHAN }
-    | ':'      { COLON }
+    | '-'      { MINUS }
+    | '*'      { MULTIPLY }
+    | '/'      { DIVIDE }
+    | '%'      { MODULO }
+    | '!'      { NOT }
+    | '^'      { POWER_OF }
+    | '<'      { LESS_THAN }
+    | '>'      { GREATER_THAN }
+    | "<="     { LESS_THAN_EQUAL }
+    | ">="     { GREATER_THAN_EQUAL }
+    | "=="     { EQUAL_TO }
+    | "!="     { NOT_EQUAL_TO }
+    | "or"     { OR }
+    | "and"    { AND }
     | '('      { LPAREN }
     | ')'      { RPAREN }
-    | ':'      { COLON }
+    | '{'      { SCOPE_BRACE_LEFT }
+    | '}'      { SCOPE_BRACE_RIGHT }
     | '='      { EQUALS }
+    | "+="     { PLUS_EQUALS }
+    | "-="     { MINUS_EQUALS }
+    | "*="     { MULTIPLY_EQUALS }
+    | "/="     { DIVIDE_EQUALS }
+    | '\n'     { NEW_LINE }
     | eof      { EOF }
