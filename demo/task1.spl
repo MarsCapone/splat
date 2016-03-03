@@ -1,9 +1,9 @@
-function task1 (stream splat) = {
-    show 0;
+function stream task1 (stream splat) = {
+    show 0¬
     for (string s) in splat {
-        show s
+        show s¬
     }
 }
 
 
-task1
+task1 stdin¬

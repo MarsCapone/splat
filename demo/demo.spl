@@ -1,0 +1,11 @@
+function list_demo = {
+    ((list days) = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday',
+     'saturday', 'sunday']) {
+        for (int s) in (range 0 (length days) 2) {
+            show days[s]¬
+        }
+    }
+}
+
+
+
