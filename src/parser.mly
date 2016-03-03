@@ -42,3 +42,16 @@
 %nonassoc IF THEN ELSE WHILE FOR FOREVER IN
 
 %start parser_main
+%type <Splat.splatTerm> parser_main
+%type <Splat.splatType> type_spec
+%%
+parser_main: expr EOF { $1 }
+;
+type_spec:
+    NUMBER_TYPE         { splatNumber }
+    | BOOLEAN_TYPE      { splatBoolean }
+    | STRING_TYPE       { splatString }
+    | LIST_TYPE         { splatList }
+    | STREAM_TYPE       { splatStream }
+    | FUNCTION_TYPE     { splatFunction }
+    | LPAREN type_spec RPAREN { $2 }

@@ -76,6 +76,8 @@ rule functions = parse
 rule other = parse
     '['     { SQUARE_BRACE_LEFT }
     ']'     { SQUARE_BRACE_RIGHT }
+    '('     { LPAREN }
+    ')'     { RPAREN }
     ','     { SEPARATOR }
     '"'     { STRING_WRAPPER }
     '\\'    { ESCAPE_CHAR }
