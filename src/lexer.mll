@@ -18,11 +18,13 @@ rule types = parse
 
 rule flow = parse
     "function"  { FUNCTION }
-    | "for"       { FOR }
+    | "for"     { FOR }
+    | "forever" { FOREVER }
     | "in"     { IN }
     | "if"     { IF }
     | "then"   { THEN }
     | "else"   { ELSE }
+    | "while"  { WHILE }
     | "switch" { SWITCH }
     | "break"  { BREAK }
     | "continue" { CONTINUE }
