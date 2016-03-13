@@ -69,6 +69,10 @@ boolean_expr:
 comparator_expr:
     math_expr LESS_THAN_EQUAL math_expr     { splLe ($1, $3) }
     math_expr GREATER_THAN_EQUAL math_expr  { splGe ($1, $3) }
+    math_expr LESS_THAN math_expr           { splLt ($1, $3) }
+    math_expr GREATER_THAN math_expr        { splGt ($1, $3) }
+    math_expr NOT_EQUAL_TO math_expr        { splNe ($1, $3) }
+    math_expr EQUAL_TO math_expr            { splEq ($1, $3) }
 ;
 
 math_expr:
