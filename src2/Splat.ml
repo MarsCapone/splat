@@ -250,6 +250,7 @@ let rec eval env e = match e with
 
   (*Assignment*)
   | (SplLet(n, SplNumber(m), e3)) -> let (env') = (addBinding env n (SplNumber(m))) in (e3, env')
+  | (SplLet(n, SplBoolean(m), e3)) -> let (env') = (addBinding env n (SplBoolean(m))) in (e3, env')
   | (SplLet(n, m, e3)) -> let (m', env') = (eval env m) in (SplLet(n, m', e3), env')
 
   | _ -> raise Terminated ;;

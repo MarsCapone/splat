@@ -25,7 +25,7 @@
 /*Functions*/
 %token SHOW RANGE SPLIT
 /*Other*/
-%token SQUARE_BRACE_LEFT SQUARE_BRACE_RIGHT
+%token SQUARE_BRACE_LEFT SQUARE_BRACE_RIGHT LET
 %token SEPARATOR
 %token STRING_WRAPPER
 %token ESCAPE_CHAR
@@ -61,7 +61,7 @@ type_spec:
 ;
 
 expr:
-    | LPAREN IDENT EQUALS expr RPAREN SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT { SplLet ($2, $4, $7) }
+    | LET SQUARE_BRACE_LEFT IDENT EQUALS expr SQUARE_BRACE_RIGHT SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT { SplLet ($3, $5, $8) }
 
     | NUMBER                        { SplNumber $1 }
     | IDENT                         { SplVariable $1 }
