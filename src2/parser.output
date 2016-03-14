@@ -4,20 +4,29 @@
 
    2  type_spec : NUMBER_TYPE
    3            | BOOLEAN_TYPE
-   4            | type_spec FUNCTION_TYPE type_spec
-   5            | LPAREN type_spec RPAREN
+   4            | STRING_TYPE
+   5            | LIST_TYPE
+   6            | STREAM_TYPE
+   7            | FUNCTION_TYPE type_spec IDENT type_spec
+   8            | LPAREN type_spec RPAREN
 
-   6  expr : NUMBER
-   7       | FALSE
-   8       | TRUE
-   9       | IDENT
-  10       | expr PLUS expr
-  11       | expr MINUS expr
-  12       | LPAREN expr RPAREN
-  13       | expr LESS_THAN expr
-  14       | expr GREATER_THAN expr
+   9  expr : NUMBER
+  10       | IDENT
+  11       | FALSE
+  12       | TRUE
+  13       | expr AND expr
+  14       | expr OR expr
+  15       | NOT expr
+  16       | expr PLUS expr
+  17       | expr MINUS expr
+  18       | expr TIMES expr
+  19       | expr DIVIDE expr
+  20       | expr MODULO expr
+  21       | LPAREN expr RPAREN
+  22       | expr LESS_THAN expr
+  23       | expr GREATER_THAN expr
 
-  15  %entry% : '\001' parser_main
+  24  %entry% : '\001' parser_main
 
 state 0
 	$accept : . %entry% $end  (0)
@@ -29,17 +38,18 @@ state 0
 
 
 state 1
-	%entry% : '\001' . parser_main  (15)
+	%entry% : '\001' . parser_main  (24)
 
 	NUMBER  shift 3
 	IDENT  shift 4
-	LPAREN  shift 5
+	NOT  shift 5
 	TRUE  shift 6
 	FALSE  shift 7
+	LPAREN  shift 8
 	.  error
 
-	parser_main  goto 8
-	expr  goto 9
+	parser_main  goto 9
+	expr  goto 10
 
 
 state 2
@@ -49,194 +59,490 @@ state 2
 
 
 state 3
-	expr : NUMBER .  (6)
-
-	.  reduce 6
-
-
-state 4
-	expr : IDENT .  (9)
+	expr : NUMBER .  (9)
 
 	.  reduce 9
 
 
+state 4
+	expr : IDENT .  (10)
+
+	.  reduce 10
+
+
 state 5
-	expr : LPAREN . expr RPAREN  (12)
+	expr : NOT . expr  (15)
 
 	NUMBER  shift 3
 	IDENT  shift 4
-	LPAREN  shift 5
+	NOT  shift 5
 	TRUE  shift 6
 	FALSE  shift 7
+	LPAREN  shift 8
 	.  error
 
-	expr  goto 10
+	expr  goto 11
 
 
 state 6
-	expr : TRUE .  (8)
+	expr : TRUE .  (12)
 
-	.  reduce 8
+	.  reduce 12
 
 
 state 7
-	expr : FALSE .  (7)
+	expr : FALSE .  (11)
 
-	.  reduce 7
+	.  reduce 11
 
 
 state 8
-	%entry% : '\001' parser_main .  (15)
+	expr : LPAREN . expr RPAREN  (21)
 
-	.  reduce 15
+	NUMBER  shift 3
+	IDENT  shift 4
+	NOT  shift 5
+	TRUE  shift 6
+	FALSE  shift 7
+	LPAREN  shift 8
+	.  error
+
+	expr  goto 12
 
 
 state 9
-	parser_main : expr . EOF  (1)
-	expr : expr . PLUS expr  (10)
-	expr : expr . MINUS expr  (11)
-	expr : expr . LESS_THAN expr  (13)
-	expr : expr . GREATER_THAN expr  (14)
+	%entry% : '\001' parser_main .  (24)
 
-	PLUS  shift 11
-	MINUS  shift 12
-	LESS_THAN  shift 13
-	GREATER_THAN  shift 14
-	EOF  shift 15
-	.  error
+	.  reduce 24
 
 
 state 10
-	expr : expr . PLUS expr  (10)
-	expr : expr . MINUS expr  (11)
-	expr : LPAREN expr . RPAREN  (12)
-	expr : expr . LESS_THAN expr  (13)
-	expr : expr . GREATER_THAN expr  (14)
+	parser_main : expr . EOF  (1)
+	expr : expr . AND expr  (13)
+	expr : expr . OR expr  (14)
+	expr : expr . PLUS expr  (16)
+	expr : expr . MINUS expr  (17)
+	expr : expr . TIMES expr  (18)
+	expr : expr . DIVIDE expr  (19)
+	expr : expr . MODULO expr  (20)
+	expr : expr . LESS_THAN expr  (22)
+	expr : expr . GREATER_THAN expr  (23)
 
-	PLUS  shift 11
-	MINUS  shift 12
-	RPAREN  shift 16
-	LESS_THAN  shift 13
-	GREATER_THAN  shift 14
+	PLUS  shift 13
+	MINUS  shift 14
+	TIMES  shift 15
+	DIVIDE  shift 16
+	MODULO  shift 17
+	OR  shift 18
+	AND  shift 19
+	EOF  shift 20
+	LESS_THAN  shift 21
+	GREATER_THAN  shift 22
 	.  error
 
 
 state 11
-	expr : expr PLUS . expr  (10)
+	expr : expr . AND expr  (13)
+	expr : expr . OR expr  (14)
+	expr : NOT expr .  (15)
+	expr : expr . PLUS expr  (16)
+	expr : expr . MINUS expr  (17)
+	expr : expr . TIMES expr  (18)
+	expr : expr . DIVIDE expr  (19)
+	expr : expr . MODULO expr  (20)
+	expr : expr . LESS_THAN expr  (22)
+	expr : expr . GREATER_THAN expr  (23)
 
-	NUMBER  shift 3
-	IDENT  shift 4
-	LPAREN  shift 5
-	TRUE  shift 6
-	FALSE  shift 7
-	.  error
-
-	expr  goto 17
+	.  reduce 15
 
 
 state 12
-	expr : expr MINUS . expr  (11)
+	expr : expr . AND expr  (13)
+	expr : expr . OR expr  (14)
+	expr : expr . PLUS expr  (16)
+	expr : expr . MINUS expr  (17)
+	expr : expr . TIMES expr  (18)
+	expr : expr . DIVIDE expr  (19)
+	expr : expr . MODULO expr  (20)
+	expr : LPAREN expr . RPAREN  (21)
+	expr : expr . LESS_THAN expr  (22)
+	expr : expr . GREATER_THAN expr  (23)
 
-	NUMBER  shift 3
-	IDENT  shift 4
-	LPAREN  shift 5
-	TRUE  shift 6
-	FALSE  shift 7
+	PLUS  shift 13
+	MINUS  shift 14
+	TIMES  shift 15
+	DIVIDE  shift 16
+	MODULO  shift 17
+	OR  shift 18
+	AND  shift 19
+	LESS_THAN  shift 21
+	GREATER_THAN  shift 22
+	RPAREN  shift 23
 	.  error
-
-	expr  goto 18
 
 
 state 13
-	expr : expr LESS_THAN . expr  (13)
+	expr : expr PLUS . expr  (16)
 
 	NUMBER  shift 3
 	IDENT  shift 4
-	LPAREN  shift 5
+	NOT  shift 5
 	TRUE  shift 6
 	FALSE  shift 7
+	LPAREN  shift 8
 	.  error
 
-	expr  goto 19
+	expr  goto 24
 
 
 state 14
-	expr : expr GREATER_THAN . expr  (14)
+	expr : expr MINUS . expr  (17)
 
 	NUMBER  shift 3
 	IDENT  shift 4
-	LPAREN  shift 5
+	NOT  shift 5
 	TRUE  shift 6
 	FALSE  shift 7
+	LPAREN  shift 8
 	.  error
 
-	expr  goto 20
+	expr  goto 25
 
 
 state 15
+	expr : expr TIMES . expr  (18)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	NOT  shift 5
+	TRUE  shift 6
+	FALSE  shift 7
+	LPAREN  shift 8
+	.  error
+
+	expr  goto 26
+
+
+state 16
+	expr : expr DIVIDE . expr  (19)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	NOT  shift 5
+	TRUE  shift 6
+	FALSE  shift 7
+	LPAREN  shift 8
+	.  error
+
+	expr  goto 27
+
+
+state 17
+	expr : expr MODULO . expr  (20)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	NOT  shift 5
+	TRUE  shift 6
+	FALSE  shift 7
+	LPAREN  shift 8
+	.  error
+
+	expr  goto 28
+
+
+state 18
+	expr : expr OR . expr  (14)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	NOT  shift 5
+	TRUE  shift 6
+	FALSE  shift 7
+	LPAREN  shift 8
+	.  error
+
+	expr  goto 29
+
+
+state 19
+	expr : expr AND . expr  (13)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	NOT  shift 5
+	TRUE  shift 6
+	FALSE  shift 7
+	LPAREN  shift 8
+	.  error
+
+	expr  goto 30
+
+
+state 20
 	parser_main : expr EOF .  (1)
 
 	.  reduce 1
 
 
-state 16
-	expr : LPAREN expr RPAREN .  (12)
+state 21
+	expr : expr LESS_THAN . expr  (22)
 
-	.  reduce 12
+	NUMBER  shift 3
+	IDENT  shift 4
+	NOT  shift 5
+	TRUE  shift 6
+	FALSE  shift 7
+	LPAREN  shift 8
+	.  error
 
-
-state 17
-	expr : expr . PLUS expr  (10)
-	expr : expr PLUS expr .  (10)
-	expr : expr . MINUS expr  (11)
-	expr : expr . LESS_THAN expr  (13)
-	expr : expr . GREATER_THAN expr  (14)
-
-	.  reduce 10
+	expr  goto 31
 
 
-state 18
-	expr : expr . PLUS expr  (10)
-	expr : expr . MINUS expr  (11)
-	expr : expr MINUS expr .  (11)
-	expr : expr . LESS_THAN expr  (13)
-	expr : expr . GREATER_THAN expr  (14)
+state 22
+	expr : expr GREATER_THAN . expr  (23)
 
-	.  reduce 11
+	NUMBER  shift 3
+	IDENT  shift 4
+	NOT  shift 5
+	TRUE  shift 6
+	FALSE  shift 7
+	LPAREN  shift 8
+	.  error
 
-
-state 19
-	expr : expr . PLUS expr  (10)
-	expr : expr . MINUS expr  (11)
-	expr : expr . LESS_THAN expr  (13)
-	expr : expr LESS_THAN expr .  (13)
-	expr : expr . GREATER_THAN expr  (14)
-
-	PLUS  shift 11
-	MINUS  shift 12
-	RPAREN  reduce 13
-	EOF  reduce 13
+	expr  goto 32
 
 
-state 20
-	expr : expr . PLUS expr  (10)
-	expr : expr . MINUS expr  (11)
-	expr : expr . LESS_THAN expr  (13)
-	expr : expr . GREATER_THAN expr  (14)
-	expr : expr GREATER_THAN expr .  (14)
+state 23
+	expr : LPAREN expr RPAREN .  (21)
 
-	PLUS  shift 11
-	MINUS  shift 12
-	RPAREN  reduce 14
+	.  reduce 21
+
+
+state 24
+	expr : expr . AND expr  (13)
+	expr : expr . OR expr  (14)
+	expr : expr . PLUS expr  (16)
+	expr : expr PLUS expr .  (16)
+	expr : expr . MINUS expr  (17)
+	expr : expr . TIMES expr  (18)
+	expr : expr . DIVIDE expr  (19)
+	expr : expr . MODULO expr  (20)
+	expr : expr . LESS_THAN expr  (22)
+	expr : expr . GREATER_THAN expr  (23)
+
+	TIMES  shift 15
+	DIVIDE  shift 16
+	MODULO  shift 17
+	PLUS  reduce 16
+	MINUS  reduce 16
+	OR  reduce 16
+	AND  reduce 16
+	EOF  reduce 16
+	LESS_THAN  reduce 16
+	GREATER_THAN  reduce 16
+	RPAREN  reduce 16
+
+
+state 25
+	expr : expr . AND expr  (13)
+	expr : expr . OR expr  (14)
+	expr : expr . PLUS expr  (16)
+	expr : expr . MINUS expr  (17)
+	expr : expr MINUS expr .  (17)
+	expr : expr . TIMES expr  (18)
+	expr : expr . DIVIDE expr  (19)
+	expr : expr . MODULO expr  (20)
+	expr : expr . LESS_THAN expr  (22)
+	expr : expr . GREATER_THAN expr  (23)
+
+	TIMES  shift 15
+	DIVIDE  shift 16
+	MODULO  shift 17
+	PLUS  reduce 17
+	MINUS  reduce 17
+	OR  reduce 17
+	AND  reduce 17
+	EOF  reduce 17
+	LESS_THAN  reduce 17
+	GREATER_THAN  reduce 17
+	RPAREN  reduce 17
+
+
+state 26
+	expr : expr . AND expr  (13)
+	expr : expr . OR expr  (14)
+	expr : expr . PLUS expr  (16)
+	expr : expr . MINUS expr  (17)
+	expr : expr . TIMES expr  (18)
+	expr : expr TIMES expr .  (18)
+	expr : expr . DIVIDE expr  (19)
+	expr : expr . MODULO expr  (20)
+	expr : expr . LESS_THAN expr  (22)
+	expr : expr . GREATER_THAN expr  (23)
+
+	.  reduce 18
+
+
+state 27
+	expr : expr . AND expr  (13)
+	expr : expr . OR expr  (14)
+	expr : expr . PLUS expr  (16)
+	expr : expr . MINUS expr  (17)
+	expr : expr . TIMES expr  (18)
+	expr : expr . DIVIDE expr  (19)
+	expr : expr DIVIDE expr .  (19)
+	expr : expr . MODULO expr  (20)
+	expr : expr . LESS_THAN expr  (22)
+	expr : expr . GREATER_THAN expr  (23)
+
+	TIMES  shift 15
+	PLUS  reduce 19
+	MINUS  reduce 19
+	DIVIDE  reduce 19
+	MODULO  reduce 19
+	OR  reduce 19
+	AND  reduce 19
+	EOF  reduce 19
+	LESS_THAN  reduce 19
+	GREATER_THAN  reduce 19
+	RPAREN  reduce 19
+
+
+state 28
+	expr : expr . AND expr  (13)
+	expr : expr . OR expr  (14)
+	expr : expr . PLUS expr  (16)
+	expr : expr . MINUS expr  (17)
+	expr : expr . TIMES expr  (18)
+	expr : expr . DIVIDE expr  (19)
+	expr : expr . MODULO expr  (20)
+	expr : expr MODULO expr .  (20)
+	expr : expr . LESS_THAN expr  (22)
+	expr : expr . GREATER_THAN expr  (23)
+
+	TIMES  shift 15
+	PLUS  reduce 20
+	MINUS  reduce 20
+	DIVIDE  reduce 20
+	MODULO  reduce 20
+	OR  reduce 20
+	AND  reduce 20
+	EOF  reduce 20
+	LESS_THAN  reduce 20
+	GREATER_THAN  reduce 20
+	RPAREN  reduce 20
+
+
+state 29
+	expr : expr . AND expr  (13)
+	expr : expr . OR expr  (14)
+	expr : expr OR expr .  (14)
+	expr : expr . PLUS expr  (16)
+	expr : expr . MINUS expr  (17)
+	expr : expr . TIMES expr  (18)
+	expr : expr . DIVIDE expr  (19)
+	expr : expr . MODULO expr  (20)
+	expr : expr . LESS_THAN expr  (22)
+	expr : expr . GREATER_THAN expr  (23)
+
+	PLUS  shift 13
+	MINUS  shift 14
+	TIMES  shift 15
+	DIVIDE  shift 16
+	MODULO  shift 17
+	AND  shift 19
+	LESS_THAN  shift 21
+	GREATER_THAN  shift 22
+	OR  reduce 14
 	EOF  reduce 14
+	RPAREN  reduce 14
+
+
+state 30
+	expr : expr . AND expr  (13)
+	expr : expr AND expr .  (13)
+	expr : expr . OR expr  (14)
+	expr : expr . PLUS expr  (16)
+	expr : expr . MINUS expr  (17)
+	expr : expr . TIMES expr  (18)
+	expr : expr . DIVIDE expr  (19)
+	expr : expr . MODULO expr  (20)
+	expr : expr . LESS_THAN expr  (22)
+	expr : expr . GREATER_THAN expr  (23)
+
+	PLUS  shift 13
+	MINUS  shift 14
+	TIMES  shift 15
+	DIVIDE  shift 16
+	MODULO  shift 17
+	LESS_THAN  shift 21
+	GREATER_THAN  shift 22
+	OR  reduce 13
+	AND  reduce 13
+	EOF  reduce 13
+	RPAREN  reduce 13
+
+
+state 31
+	expr : expr . AND expr  (13)
+	expr : expr . OR expr  (14)
+	expr : expr . PLUS expr  (16)
+	expr : expr . MINUS expr  (17)
+	expr : expr . TIMES expr  (18)
+	expr : expr . DIVIDE expr  (19)
+	expr : expr . MODULO expr  (20)
+	expr : expr . LESS_THAN expr  (22)
+	expr : expr LESS_THAN expr .  (22)
+	expr : expr . GREATER_THAN expr  (23)
+
+	PLUS  shift 13
+	MINUS  shift 14
+	TIMES  shift 15
+	DIVIDE  shift 16
+	MODULO  shift 17
+	OR  reduce 22
+	AND  reduce 22
+	EOF  reduce 22
+	LESS_THAN  reduce 22
+	GREATER_THAN  reduce 22
+	RPAREN  reduce 22
+
+
+state 32
+	expr : expr . AND expr  (13)
+	expr : expr . OR expr  (14)
+	expr : expr . PLUS expr  (16)
+	expr : expr . MINUS expr  (17)
+	expr : expr . TIMES expr  (18)
+	expr : expr . DIVIDE expr  (19)
+	expr : expr . MODULO expr  (20)
+	expr : expr . LESS_THAN expr  (22)
+	expr : expr . GREATER_THAN expr  (23)
+	expr : expr GREATER_THAN expr .  (23)
+
+	PLUS  shift 13
+	MINUS  shift 14
+	TIMES  shift 15
+	DIVIDE  shift 16
+	MODULO  shift 17
+	OR  reduce 23
+	AND  reduce 23
+	EOF  reduce 23
+	LESS_THAN  reduce 23
+	GREATER_THAN  reduce 23
+	RPAREN  reduce 23
 
 
 Rules never reduced:
 	type_spec : NUMBER_TYPE  (2)
 	type_spec : BOOLEAN_TYPE  (3)
-	type_spec : type_spec FUNCTION_TYPE type_spec  (4)
-	type_spec : LPAREN type_spec RPAREN  (5)
+	type_spec : STRING_TYPE  (4)
+	type_spec : LIST_TYPE  (5)
+	type_spec : STREAM_TYPE  (6)
+	type_spec : FUNCTION_TYPE type_spec IDENT type_spec  (7)
+	type_spec : LPAREN type_spec RPAREN  (8)
 
 
-31 terminals, 5 nonterminals
-16 grammar rules, 21 states
+59 terminals, 5 nonterminals
+25 grammar rules, 33 states

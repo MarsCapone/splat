@@ -1,31 +1,60 @@
 type token =
   | NUMBER of (float)
   | IDENT of (string)
-  | LAMBDA
+  | BOOLEAN_TYPE
+  | NUMBER_TYPE
+  | STRING_TYPE
+  | STREAM_TYPE
+  | LIST_TYPE
+  | FUNCTION_TYPE
   | PLUS
   | MINUS
   | TIMES
   | DIVIDE
-  | LPAREN
-  | RPAREN
-  | LET
+  | MODULO
+  | NOT
+  | POWER_OF
+  | OR
+  | AND
+  | FOR
+  | FOREVER
   | IN
-  | EQUALS
   | IF
   | THEN
   | ELSE
-  | BOOLEAN_TYPE
-  | NUMBER_TYPE
-  | FUNCTION_TYPE
-  | STRING_TYPE
-  | STREAM_TYPE
-  | LIST_TYPE
+  | WHILE
+  | SWITCH
+  | BREAK
+  | CONTINUE
+  | RETURN
   | TRUE
   | FALSE
-  | LESS_THAN
-  | GREATER_THAN
-  | COLON
+  | STDIN
+  | END_OF_STATEMENT
   | EOF
+  | LESS_THAN
+  | LESS_THAN_EQUAL
+  | GREATER_THAN
+  | GREATER_THAN_EQUAL
+  | EQUAL_TO
+  | NOT_EQUAL_TO
+  | SCOPE_BRACE_LEFT
+  | SCOPE_BRACE_RIGHT
+  | EQUALS
+  | PLUS_EQUALS
+  | MINUS_EQUALS
+  | MULTIPLY_EQUALS
+  | DIVIDE_EQUALS
+  | SHOW
+  | RANGE
+  | SPLIT
+  | SQUARE_BRACE_LEFT
+  | SQUARE_BRACE_RIGHT
+  | SEPARATOR
+  | STRING_WRAPPER
+  | ESCAPE_CHAR
+  | LPAREN
+  | RPAREN
 
 val parser_main :
   (Lexing.lexbuf  -> token) -> Lexing.lexbuf -> Splat.splTerm

@@ -4,20 +4,45 @@
 %}
 %token <float> NUMBER
 %token <string> IDENT
-%token LAMBDA
-%token PLUS MINUS TIMES DIVIDE
-%token LPAREN RPAREN
-%token LET IN EQUALS
+%token BOOLEAN_TYPE NUMBER_TYPE STRING_TYPE STREAM_TYPE LIST_TYPE FUNCTION_TYPE
+/*Operators*/
+%token PLUS MINUS TIMES DIVIDE MODULO NOT POWER_OF OR AND
+%token FOR FOREVER IN
 %token IF THEN ELSE
-%token BOOLEAN_TYPE NUMBER_TYPE FUNCTION_TYPE STRING_TYPE STREAM_TYPE LIST_TYPE
+%token WHILE
+%token SWITCH
+%token BREAK CONTINUE RETURN
+/*Predefined*/
 %token TRUE FALSE
-%token LESS_THAN GREATER_THAN
-%token COLON
-%token EOF
-%left FUNTYPE
-%nonassoc LESS_THAN GREATER_THAN             /* lowest precedence */
+%token STDIN
+%token END_OF_STATEMENT EOF
+/*Comparators*/
+%token LESS_THAN LESS_THAN_EQUAL GREATER_THAN GREATER_THAN_EQUAL EQUAL_TO NOT_EQUAL_TO
+/*Scope*/
+%token SCOPE_BRACE_LEFT SCOPE_BRACE_RIGHT
+/*Assignments*/
+%token EQUALS PLUS_EQUALS MINUS_EQUALS MULTIPLY_EQUALS DIVIDE_EQUALS
+/*Functions*/
+%token SHOW RANGE SPLIT
+/*Other*/
+%token SQUARE_BRACE_LEFT SQUARE_BRACE_RIGHT
+%token SEPARATOR
+%token STRING_WRAPPER
+%token ESCAPE_CHAR
+%token LPAREN RPAREN
+/*Associativity and precedence*/
+%left SEPARATOR             /*Lowest precedence*/
+%right EQUALS PLUS_EQUALS MINUS_EQUALS MULTIPLY_EQUALS DIVIDE_EQUALS
+%left OR
+%left AND
+%left EQUAL_TO NOT_EQUAL_TO
+%left LESS_THAN LESS_THAN_EQUAL GREATER_THAN GREATER_THAN_EQUAL
 %left PLUS MINUS
-%nonassoc IF THEN ELSE LET IN /* highest precedence */
+%left DIVIDE MODULO
+%left TIMES
+%right POWER_OF NOT
+%nonassoc IF THEN ELSE WHILE FOR FOREVER IN
+
 %start parser_main             /* the entry point */
 %type <Splat.splTerm> parser_main
 %type <Splat.splType> type_spec
@@ -26,19 +51,35 @@ parser_main:
     expr EOF { $1 }
 ;
 type_spec:
-    NUMBER_TYPE { SplatNumber}
-    | BOOLEAN_TYPE     { SplatBoolean }
-    | type_spec FUNCTION_TYPE type_spec { SplatFunction ($1,$3) }
-    | LPAREN type_spec RPAREN {$2}
+    NUMBER_TYPE         { SplatNumber }
+    | BOOLEAN_TYPE      { SplatBoolean }
+    | STRING_TYPE       { SplatString }
+    | LIST_TYPE         { SplatList }
+    | STREAM_TYPE       { SplatStream }
+    | FUNCTION_TYPE type_spec IDENT type_spec    { SplatFunction ($2, $4) }
+    | LPAREN type_spec RPAREN { $2 }
 ;
+
 expr:
-    NUMBER                      { SplNumber $1 }
-    | FALSE                       { SplBoolean false }
-    | TRUE                        { SplBoolean true }
-    | IDENT                       { SplVariable $1 }
-    | expr PLUS expr              { SplPlus ($1, $3) }
-    | expr MINUS expr             { SplMinus ($1, $3) }
-    | LPAREN expr RPAREN          { $2 }
-    | expr LESS_THAN expr         { SplLt ($1, $3) }
-    | expr GREATER_THAN expr      { SplGt ($1, $3) }
+    NUMBER                          { SplNumber $1 }
+    | IDENT                         { SplVariable $1 }
+
+    /*Booleans*/
+    | FALSE                         { SplBoolean false }
+    | TRUE                          { SplBoolean true }
+    | expr AND expr                 { SplAnd ($1, $3) }
+    | expr OR expr                  { SplOr ($1, $3) }
+    | NOT expr                      { SplNot $2 }
+
+    /*Arithmetic*/
+    | expr PLUS expr                { SplPlus ($1, $3) }
+    | expr MINUS expr               { SplMinus ($1, $3) }
+    | expr TIMES expr               { SplTimes ($1, $3) }
+    | expr DIVIDE expr              { SplDivide ($1, $3) }
+    | expr MODULO expr              { SplModulo ($1, $3) }
+    | LPAREN expr RPAREN            { $2 }
+
+    /*Comparisons*/
+    | expr LESS_THAN expr           { SplLt ($1, $3) }
+    | expr GREATER_THAN expr        { SplGt ($1, $3) }
 ;
