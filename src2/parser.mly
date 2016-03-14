@@ -61,7 +61,9 @@ type_spec:
 ;
 
 expr:
-    NUMBER                          { SplNumber $1 }
+    | expr END_OF_STATEMENT         { $1 }
+
+    | NUMBER                        { SplNumber $1 }
     | IDENT                         { SplVariable $1 }
 
     /*Booleans*/
@@ -77,6 +79,7 @@ expr:
     | expr TIMES expr               { SplTimes ($1, $3) }
     | expr DIVIDE expr              { SplDivide ($1, $3) }
     | expr MODULO expr              { SplModulo ($1, $3) }
+    | expr POWER_OF expr            { SplPower ($1, $3) }
     | LPAREN expr RPAREN            { $2 }
 
     /*Comparisons*/
@@ -86,4 +89,7 @@ expr:
     | expr GREATER_THAN expr          { SplGt ($1, $3) }
     | expr NOT_EQUAL_TO expr          { SplNe ($1, $3) }
     | expr EQUAL_TO expr              { SplEq ($1, $3) }
+
+    /*Flow control*/
+    | IF expr SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT ELSE SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT      { SplIfElse ($2, $4, $8) }
 ;

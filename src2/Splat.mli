@@ -28,7 +28,6 @@ type splTerm =
     | SplForever of splTerm
     | SplWhile of splTerm * splTerm
     | SplIfElse of splTerm * splTerm * splTerm
-    | SplIf of splTerm * splTerm
     | SplSwitch of splTerm * splTerm
 (* comparators *)
     | SplLt of splTerm * splTerm

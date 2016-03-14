@@ -38,7 +38,6 @@ type splTerm =
     | SplForever of splTerm
     | SplWhile of splTerm * splTerm
     | SplIfElse of splTerm * splTerm * splTerm
-    | SplIf of splTerm * splTerm
     | SplSwitch of splTerm * splTerm
 (* comparators *)
     | SplLt of splTerm * splTerm
@@ -153,6 +152,14 @@ let rec typeOf env e = match e with
         |_ -> raise TypeError
     )
 
+    (*Flow control*)
+    |SplIfElse(e1, e2, e3) -> (
+        match (typeOf env e1) , (typeOf env e2), (typeOf env e3) with
+              SplatBoolean, SplatNumber, SplatNumber -> SplatNumber
+            | SplatBoolean, SplatBoolean, SplatBoolean -> SplatBoolean
+            | _ -> raise TypeError
+    )
+
     |SplVariable (x) ->  (try lookup env x with LookupError -> raise TypeError)
 
 let typeProg e = typeOf (Env []) e ;;
@@ -222,10 +229,22 @@ let rec eval env e = match e with
   | (SplModulo(SplNumber(n), e2))      -> let (e2',env') = (eval env e2) in (SplModulo(SplNumber(n),e2'),env')
   | (SplModulo(e1, e2))            -> let (e1',env') = (eval env e1) in (SplModulo(e1', e2) ,env')
 
+  | (SplPower(SplNumber(n),SplNumber(m))) -> (SplNumber( n ** m ) , env)
+  | (SplPower(SplNumber(n), e2))      -> let (e2',env') = (eval env e2) in (SplPower(SplNumber(n),e2'),env')
+  | (SplPower(e1, e2))            -> let (e1',env') = (eval env e1) in (SplPower(e1', e2) ,env')
+
+  (*Flow*)
+  | (SplIfElse(SplBoolean(n), SplNumber(m), SplNumber(o))) -> (SplNumber( if n then m else o), env)
+  | (SplIfElse(SplBoolean(n), SplBoolean(m), SplBoolean(o))) -> (SplBoolean( if n then m else o), env)
+  | (SplIfElse(SplBoolean(n), SplNumber(m), e3))      -> let (e3',env') = (eval env e3) in (SplIfElse(SplBoolean(n),SplNumber(m),e3),env')
+  | (SplIfElse(SplBoolean(n), SplBoolean(m), e3))      -> let (e3',env') = (eval env e3) in (SplIfElse(SplBoolean(n),SplBoolean(m),e3),env')
+  | (SplIfElse(SplBoolean(n), e2, e3))      -> let (e2',env') = (eval env e2) in (SplIfElse(SplBoolean(n),e2',e3),env')
+  | (SplIfElse(e1, e2, e3))            -> let (e1',env') = (eval env e1) in (SplIfElse(e1', e2, e3) ,env')
+
   | _ -> raise Terminated ;;
 
 
-let rec evalloop env e = try (let (e',env') = (eval env e) in (evalloop env' e')) with Terminated -> if (isValue e) then e else raise StuckTerm  ;;
+let rec evalloop env e = try (let (e',env') = (eval env e) in (evalloop env' e')) with Terminated -> if (isValue e) then e else raise StuckTerm;;
 let evalProg e = evalloop (Env []) e ;;
 
 let rename (s:string) = s^"'";;
