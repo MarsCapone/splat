@@ -17,6 +17,7 @@ rule lexer_main = parse
     | "false"  { FALSE }
     | ['a'-'z']+ as lxm { IDENT(lxm) }
     | '+'      { PLUS }
+    | '-'      { MINUS }
     | '<'      { LESSTHAN }
     | ':'      { COLON }
     | '('      { LPAREN }

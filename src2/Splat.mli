@@ -1,23 +1,54 @@
-type splatType =
-  SplatNumber
-| SplatBoolean
-| SplatString
-| SplatList
-| SplatStream
-| SplatFunction of splatType * splatType;;
+type splType =
+    SplatNumber
+    | SplatBoolean
+    | SplatString
+    | SplatList
+    | SplatStream
+    | SplatFunction of splType * splType
 
-type toyTerm =
-    TmNum of float
-    | TmBool of bool
-    | TmLessThan of toyTerm * toyTerm
-    | TmPlus of toyTerm * toyTerm
-    | TmVar of string
-    | TmIf of toyTerm * toyTerm * toyTerm
-    | TmLet of string * splatType * toyTerm * toyTerm
-    | TmAbs of string * splatType * toyTerm
-    | TmApp of toyTerm * toyTerm
+(* Grammar of the language *)
+type splTerm =
+    | SplNumber of float
+    | SplBoolean of bool
+    | SplString of string
+    | SplVariable of string
+(* number operators *)
+    | SplPlus of splTerm * splTerm
+    | SplMinus of splTerm * splTerm
+    | SplTimes of splTerm * splTerm
+    | SplDivide of splTerm * splTerm
+    | SplModulo of splTerm * splTerm
+    | SplPower of splTerm * splTerm
+(* boolean operators *)
+    | SplNot of splTerm
+    | SplAnd of splTerm * splTerm
+    | SplOr of splTerm * splTerm
+(* flow *)
+    | SplFor of splTerm * splTerm * splTerm
+    | SplForever of splTerm
+    | SplWhile of splTerm * splTerm
+    | SplIfElse of splTerm * splTerm * splTerm
+    | SplIf of splTerm * splTerm
+    | SplSwitch of splTerm * splTerm
+(* comparators *)
+    | SplLt of splTerm * splTerm
+    | SplGt of splTerm * splTerm
+    | SplLe of splTerm * splTerm
+    | SplGe of splTerm * splTerm
+    | SplEq of splTerm * splTerm
+    | SplNe of splTerm * splTerm
+(* assignment *)
+    | SplAssign of string * splTerm
+    | SplPlusAssign of string * splTerm
+    | SplMinusAssign of string * splTerm
+    | SplTimesAssign of string * splTerm
+    | SplDivideAssign of string * splTerm
+(* predefined functions *)
+    | SplShow of splTerm
+    | SplRange of splTerm * splTerm * splTerm
+    | SplSplit of splTerm
 
-val typeProg : toyTerm -> splatType
-val evalProg :  toyTerm -> toyTerm
+val typeProg : splTerm -> splType
+val evalProg :  splTerm -> splTerm
 
-val print_res : toyTerm -> unit
+val print_res : splTerm -> unit
