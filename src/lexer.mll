@@ -4,7 +4,8 @@ open Parser        (* The type token is defined in parser.mli *)
 }
 rule lexer_main = parse
     [' ' '\t']     { white_space lexbuf }     (* skip blanks *)
-    | '-'?(['0'-'9']*['.'])?['0'-'9']+ as lsm { NUMBER(float_of_string lxm) } (*Variables*)
+(*Variables*)
+    | '-'?(['0'-'9']*['.'])?['0'-'9']+ as lsm { NUMBER(float_of_string lxm) }
     | ['a'-'z''A'-'Z''0'-'9']+ as lxm { IDENT(lxm) }
 
 (*Types*)

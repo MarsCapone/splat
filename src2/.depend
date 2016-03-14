@@ -1,0 +1,10 @@
+Splat.cmi :
+parser.cmi : Splat.cmi
+Splat.cmo : Splat.cmi
+Splat.cmx : Splat.cmi
+lexer.cmo : parser.cmi
+lexer.cmx : parser.cmx
+main.cmo : Splat.cmi parser.cmi lexer.cmo
+main.cmx : Splat.cmx parser.cmx lexer.cmx
+parser.cmo : Splat.cmi parser.cmi
+parser.cmx : Splat.cmx parser.cmi
