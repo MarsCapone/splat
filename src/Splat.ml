@@ -235,3 +235,8 @@ let rec eval env e = match e with
     | (splGe (splNumber(a), splNumber(b))) -> (splBoolean( a >= b ), env)
     | (splEq (splNumber(a), splNumber(b))) -> (splBoolean( a == b ), env)
     | (splNe (splNumber(a), splNumber(b))) -> (splBoolean( a != b ), env)
+
+    | _ -> raise Terminated;;
+
+let rec evalloop env e = try (let (e',env') = (eval env e) in (evalloop env' e')) with Terminated -> if (isValue e) then e else raise StuckTerm  ;;
+let evalProg e = evalloop (Env []) e ;;
