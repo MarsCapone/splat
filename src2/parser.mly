@@ -80,6 +80,10 @@ expr:
     | LPAREN expr RPAREN            { $2 }
 
     /*Comparisons*/
-    | expr LESS_THAN expr           { SplLt ($1, $3) }
-    | expr GREATER_THAN expr        { SplGt ($1, $3) }
+    | expr LESS_THAN_EQUAL expr       { SplLe ($1, $3) }
+    | expr GREATER_THAN_EQUAL expr    { SplGe ($1, $3) }
+    | expr LESS_THAN expr             { SplLt ($1, $3) }
+    | expr GREATER_THAN expr          { SplGt ($1, $3) }
+    | expr NOT_EQUAL_TO expr          { SplNe ($1, $3) }
+    | expr EQUAL_TO expr              { SplEq ($1, $3) }
 ;

@@ -23,10 +23,14 @@
   19       | expr DIVIDE expr
   20       | expr MODULO expr
   21       | LPAREN expr RPAREN
-  22       | expr LESS_THAN expr
-  23       | expr GREATER_THAN expr
+  22       | expr LESS_THAN_EQUAL expr
+  23       | expr GREATER_THAN_EQUAL expr
+  24       | expr LESS_THAN expr
+  25       | expr GREATER_THAN expr
+  26       | expr NOT_EQUAL_TO expr
+  27       | expr EQUAL_TO expr
 
-  24  %entry% : '\001' parser_main
+  28  %entry% : '\001' parser_main
 
 state 0
 	$accept : . %entry% $end  (0)
@@ -38,7 +42,7 @@ state 0
 
 
 state 1
-	%entry% : '\001' . parser_main  (24)
+	%entry% : '\001' . parser_main  (28)
 
 	NUMBER  shift 3
 	IDENT  shift 4
@@ -111,9 +115,9 @@ state 8
 
 
 state 9
-	%entry% : '\001' parser_main .  (24)
+	%entry% : '\001' parser_main .  (28)
 
-	.  reduce 24
+	.  reduce 28
 
 
 state 10
@@ -125,8 +129,12 @@ state 10
 	expr : expr . TIMES expr  (18)
 	expr : expr . DIVIDE expr  (19)
 	expr : expr . MODULO expr  (20)
-	expr : expr . LESS_THAN expr  (22)
-	expr : expr . GREATER_THAN expr  (23)
+	expr : expr . LESS_THAN_EQUAL expr  (22)
+	expr : expr . GREATER_THAN_EQUAL expr  (23)
+	expr : expr . LESS_THAN expr  (24)
+	expr : expr . GREATER_THAN expr  (25)
+	expr : expr . NOT_EQUAL_TO expr  (26)
+	expr : expr . EQUAL_TO expr  (27)
 
 	PLUS  shift 13
 	MINUS  shift 14
@@ -137,7 +145,11 @@ state 10
 	AND  shift 19
 	EOF  shift 20
 	LESS_THAN  shift 21
-	GREATER_THAN  shift 22
+	LESS_THAN_EQUAL  shift 22
+	GREATER_THAN  shift 23
+	GREATER_THAN_EQUAL  shift 24
+	EQUAL_TO  shift 25
+	NOT_EQUAL_TO  shift 26
 	.  error
 
 
@@ -150,8 +162,12 @@ state 11
 	expr : expr . TIMES expr  (18)
 	expr : expr . DIVIDE expr  (19)
 	expr : expr . MODULO expr  (20)
-	expr : expr . LESS_THAN expr  (22)
-	expr : expr . GREATER_THAN expr  (23)
+	expr : expr . LESS_THAN_EQUAL expr  (22)
+	expr : expr . GREATER_THAN_EQUAL expr  (23)
+	expr : expr . LESS_THAN expr  (24)
+	expr : expr . GREATER_THAN expr  (25)
+	expr : expr . NOT_EQUAL_TO expr  (26)
+	expr : expr . EQUAL_TO expr  (27)
 
 	.  reduce 15
 
@@ -165,8 +181,12 @@ state 12
 	expr : expr . DIVIDE expr  (19)
 	expr : expr . MODULO expr  (20)
 	expr : LPAREN expr . RPAREN  (21)
-	expr : expr . LESS_THAN expr  (22)
-	expr : expr . GREATER_THAN expr  (23)
+	expr : expr . LESS_THAN_EQUAL expr  (22)
+	expr : expr . GREATER_THAN_EQUAL expr  (23)
+	expr : expr . LESS_THAN expr  (24)
+	expr : expr . GREATER_THAN expr  (25)
+	expr : expr . NOT_EQUAL_TO expr  (26)
+	expr : expr . EQUAL_TO expr  (27)
 
 	PLUS  shift 13
 	MINUS  shift 14
@@ -176,8 +196,12 @@ state 12
 	OR  shift 18
 	AND  shift 19
 	LESS_THAN  shift 21
-	GREATER_THAN  shift 22
-	RPAREN  shift 23
+	LESS_THAN_EQUAL  shift 22
+	GREATER_THAN  shift 23
+	GREATER_THAN_EQUAL  shift 24
+	EQUAL_TO  shift 25
+	NOT_EQUAL_TO  shift 26
+	RPAREN  shift 27
 	.  error
 
 
@@ -192,7 +216,7 @@ state 13
 	LPAREN  shift 8
 	.  error
 
-	expr  goto 24
+	expr  goto 28
 
 
 state 14
@@ -206,7 +230,7 @@ state 14
 	LPAREN  shift 8
 	.  error
 
-	expr  goto 25
+	expr  goto 29
 
 
 state 15
@@ -220,7 +244,7 @@ state 15
 	LPAREN  shift 8
 	.  error
 
-	expr  goto 26
+	expr  goto 30
 
 
 state 16
@@ -234,7 +258,7 @@ state 16
 	LPAREN  shift 8
 	.  error
 
-	expr  goto 27
+	expr  goto 31
 
 
 state 17
@@ -248,7 +272,7 @@ state 17
 	LPAREN  shift 8
 	.  error
 
-	expr  goto 28
+	expr  goto 32
 
 
 state 18
@@ -262,7 +286,7 @@ state 18
 	LPAREN  shift 8
 	.  error
 
-	expr  goto 29
+	expr  goto 33
 
 
 state 19
@@ -276,7 +300,7 @@ state 19
 	LPAREN  shift 8
 	.  error
 
-	expr  goto 30
+	expr  goto 34
 
 
 state 20
@@ -286,7 +310,7 @@ state 20
 
 
 state 21
-	expr : expr LESS_THAN . expr  (22)
+	expr : expr LESS_THAN . expr  (24)
 
 	NUMBER  shift 3
 	IDENT  shift 4
@@ -296,11 +320,11 @@ state 21
 	LPAREN  shift 8
 	.  error
 
-	expr  goto 31
+	expr  goto 35
 
 
 state 22
-	expr : expr GREATER_THAN . expr  (23)
+	expr : expr LESS_THAN_EQUAL . expr  (22)
 
 	NUMBER  shift 3
 	IDENT  shift 4
@@ -310,16 +334,72 @@ state 22
 	LPAREN  shift 8
 	.  error
 
-	expr  goto 32
+	expr  goto 36
 
 
 state 23
+	expr : expr GREATER_THAN . expr  (25)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	NOT  shift 5
+	TRUE  shift 6
+	FALSE  shift 7
+	LPAREN  shift 8
+	.  error
+
+	expr  goto 37
+
+
+state 24
+	expr : expr GREATER_THAN_EQUAL . expr  (23)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	NOT  shift 5
+	TRUE  shift 6
+	FALSE  shift 7
+	LPAREN  shift 8
+	.  error
+
+	expr  goto 38
+
+
+state 25
+	expr : expr EQUAL_TO . expr  (27)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	NOT  shift 5
+	TRUE  shift 6
+	FALSE  shift 7
+	LPAREN  shift 8
+	.  error
+
+	expr  goto 39
+
+
+state 26
+	expr : expr NOT_EQUAL_TO . expr  (26)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	NOT  shift 5
+	TRUE  shift 6
+	FALSE  shift 7
+	LPAREN  shift 8
+	.  error
+
+	expr  goto 40
+
+
+state 27
 	expr : LPAREN expr RPAREN .  (21)
 
 	.  reduce 21
 
 
-state 24
+state 28
 	expr : expr . AND expr  (13)
 	expr : expr . OR expr  (14)
 	expr : expr . PLUS expr  (16)
@@ -328,8 +408,12 @@ state 24
 	expr : expr . TIMES expr  (18)
 	expr : expr . DIVIDE expr  (19)
 	expr : expr . MODULO expr  (20)
-	expr : expr . LESS_THAN expr  (22)
-	expr : expr . GREATER_THAN expr  (23)
+	expr : expr . LESS_THAN_EQUAL expr  (22)
+	expr : expr . GREATER_THAN_EQUAL expr  (23)
+	expr : expr . LESS_THAN expr  (24)
+	expr : expr . GREATER_THAN expr  (25)
+	expr : expr . NOT_EQUAL_TO expr  (26)
+	expr : expr . EQUAL_TO expr  (27)
 
 	TIMES  shift 15
 	DIVIDE  shift 16
@@ -340,11 +424,15 @@ state 24
 	AND  reduce 16
 	EOF  reduce 16
 	LESS_THAN  reduce 16
+	LESS_THAN_EQUAL  reduce 16
 	GREATER_THAN  reduce 16
+	GREATER_THAN_EQUAL  reduce 16
+	EQUAL_TO  reduce 16
+	NOT_EQUAL_TO  reduce 16
 	RPAREN  reduce 16
 
 
-state 25
+state 29
 	expr : expr . AND expr  (13)
 	expr : expr . OR expr  (14)
 	expr : expr . PLUS expr  (16)
@@ -353,8 +441,12 @@ state 25
 	expr : expr . TIMES expr  (18)
 	expr : expr . DIVIDE expr  (19)
 	expr : expr . MODULO expr  (20)
-	expr : expr . LESS_THAN expr  (22)
-	expr : expr . GREATER_THAN expr  (23)
+	expr : expr . LESS_THAN_EQUAL expr  (22)
+	expr : expr . GREATER_THAN_EQUAL expr  (23)
+	expr : expr . LESS_THAN expr  (24)
+	expr : expr . GREATER_THAN expr  (25)
+	expr : expr . NOT_EQUAL_TO expr  (26)
+	expr : expr . EQUAL_TO expr  (27)
 
 	TIMES  shift 15
 	DIVIDE  shift 16
@@ -365,11 +457,15 @@ state 25
 	AND  reduce 17
 	EOF  reduce 17
 	LESS_THAN  reduce 17
+	LESS_THAN_EQUAL  reduce 17
 	GREATER_THAN  reduce 17
+	GREATER_THAN_EQUAL  reduce 17
+	EQUAL_TO  reduce 17
+	NOT_EQUAL_TO  reduce 17
 	RPAREN  reduce 17
 
 
-state 26
+state 30
 	expr : expr . AND expr  (13)
 	expr : expr . OR expr  (14)
 	expr : expr . PLUS expr  (16)
@@ -378,13 +474,17 @@ state 26
 	expr : expr TIMES expr .  (18)
 	expr : expr . DIVIDE expr  (19)
 	expr : expr . MODULO expr  (20)
-	expr : expr . LESS_THAN expr  (22)
-	expr : expr . GREATER_THAN expr  (23)
+	expr : expr . LESS_THAN_EQUAL expr  (22)
+	expr : expr . GREATER_THAN_EQUAL expr  (23)
+	expr : expr . LESS_THAN expr  (24)
+	expr : expr . GREATER_THAN expr  (25)
+	expr : expr . NOT_EQUAL_TO expr  (26)
+	expr : expr . EQUAL_TO expr  (27)
 
 	.  reduce 18
 
 
-state 27
+state 31
 	expr : expr . AND expr  (13)
 	expr : expr . OR expr  (14)
 	expr : expr . PLUS expr  (16)
@@ -393,8 +493,12 @@ state 27
 	expr : expr . DIVIDE expr  (19)
 	expr : expr DIVIDE expr .  (19)
 	expr : expr . MODULO expr  (20)
-	expr : expr . LESS_THAN expr  (22)
-	expr : expr . GREATER_THAN expr  (23)
+	expr : expr . LESS_THAN_EQUAL expr  (22)
+	expr : expr . GREATER_THAN_EQUAL expr  (23)
+	expr : expr . LESS_THAN expr  (24)
+	expr : expr . GREATER_THAN expr  (25)
+	expr : expr . NOT_EQUAL_TO expr  (26)
+	expr : expr . EQUAL_TO expr  (27)
 
 	TIMES  shift 15
 	PLUS  reduce 19
@@ -405,108 +509,12 @@ state 27
 	AND  reduce 19
 	EOF  reduce 19
 	LESS_THAN  reduce 19
+	LESS_THAN_EQUAL  reduce 19
 	GREATER_THAN  reduce 19
+	GREATER_THAN_EQUAL  reduce 19
+	EQUAL_TO  reduce 19
+	NOT_EQUAL_TO  reduce 19
 	RPAREN  reduce 19
-
-
-state 28
-	expr : expr . AND expr  (13)
-	expr : expr . OR expr  (14)
-	expr : expr . PLUS expr  (16)
-	expr : expr . MINUS expr  (17)
-	expr : expr . TIMES expr  (18)
-	expr : expr . DIVIDE expr  (19)
-	expr : expr . MODULO expr  (20)
-	expr : expr MODULO expr .  (20)
-	expr : expr . LESS_THAN expr  (22)
-	expr : expr . GREATER_THAN expr  (23)
-
-	TIMES  shift 15
-	PLUS  reduce 20
-	MINUS  reduce 20
-	DIVIDE  reduce 20
-	MODULO  reduce 20
-	OR  reduce 20
-	AND  reduce 20
-	EOF  reduce 20
-	LESS_THAN  reduce 20
-	GREATER_THAN  reduce 20
-	RPAREN  reduce 20
-
-
-state 29
-	expr : expr . AND expr  (13)
-	expr : expr . OR expr  (14)
-	expr : expr OR expr .  (14)
-	expr : expr . PLUS expr  (16)
-	expr : expr . MINUS expr  (17)
-	expr : expr . TIMES expr  (18)
-	expr : expr . DIVIDE expr  (19)
-	expr : expr . MODULO expr  (20)
-	expr : expr . LESS_THAN expr  (22)
-	expr : expr . GREATER_THAN expr  (23)
-
-	PLUS  shift 13
-	MINUS  shift 14
-	TIMES  shift 15
-	DIVIDE  shift 16
-	MODULO  shift 17
-	AND  shift 19
-	LESS_THAN  shift 21
-	GREATER_THAN  shift 22
-	OR  reduce 14
-	EOF  reduce 14
-	RPAREN  reduce 14
-
-
-state 30
-	expr : expr . AND expr  (13)
-	expr : expr AND expr .  (13)
-	expr : expr . OR expr  (14)
-	expr : expr . PLUS expr  (16)
-	expr : expr . MINUS expr  (17)
-	expr : expr . TIMES expr  (18)
-	expr : expr . DIVIDE expr  (19)
-	expr : expr . MODULO expr  (20)
-	expr : expr . LESS_THAN expr  (22)
-	expr : expr . GREATER_THAN expr  (23)
-
-	PLUS  shift 13
-	MINUS  shift 14
-	TIMES  shift 15
-	DIVIDE  shift 16
-	MODULO  shift 17
-	LESS_THAN  shift 21
-	GREATER_THAN  shift 22
-	OR  reduce 13
-	AND  reduce 13
-	EOF  reduce 13
-	RPAREN  reduce 13
-
-
-state 31
-	expr : expr . AND expr  (13)
-	expr : expr . OR expr  (14)
-	expr : expr . PLUS expr  (16)
-	expr : expr . MINUS expr  (17)
-	expr : expr . TIMES expr  (18)
-	expr : expr . DIVIDE expr  (19)
-	expr : expr . MODULO expr  (20)
-	expr : expr . LESS_THAN expr  (22)
-	expr : expr LESS_THAN expr .  (22)
-	expr : expr . GREATER_THAN expr  (23)
-
-	PLUS  shift 13
-	MINUS  shift 14
-	TIMES  shift 15
-	DIVIDE  shift 16
-	MODULO  shift 17
-	OR  reduce 22
-	AND  reduce 22
-	EOF  reduce 22
-	LESS_THAN  reduce 22
-	GREATER_THAN  reduce 22
-	RPAREN  reduce 22
 
 
 state 32
@@ -517,9 +525,211 @@ state 32
 	expr : expr . TIMES expr  (18)
 	expr : expr . DIVIDE expr  (19)
 	expr : expr . MODULO expr  (20)
-	expr : expr . LESS_THAN expr  (22)
-	expr : expr . GREATER_THAN expr  (23)
-	expr : expr GREATER_THAN expr .  (23)
+	expr : expr MODULO expr .  (20)
+	expr : expr . LESS_THAN_EQUAL expr  (22)
+	expr : expr . GREATER_THAN_EQUAL expr  (23)
+	expr : expr . LESS_THAN expr  (24)
+	expr : expr . GREATER_THAN expr  (25)
+	expr : expr . NOT_EQUAL_TO expr  (26)
+	expr : expr . EQUAL_TO expr  (27)
+
+	TIMES  shift 15
+	PLUS  reduce 20
+	MINUS  reduce 20
+	DIVIDE  reduce 20
+	MODULO  reduce 20
+	OR  reduce 20
+	AND  reduce 20
+	EOF  reduce 20
+	LESS_THAN  reduce 20
+	LESS_THAN_EQUAL  reduce 20
+	GREATER_THAN  reduce 20
+	GREATER_THAN_EQUAL  reduce 20
+	EQUAL_TO  reduce 20
+	NOT_EQUAL_TO  reduce 20
+	RPAREN  reduce 20
+
+
+state 33
+	expr : expr . AND expr  (13)
+	expr : expr . OR expr  (14)
+	expr : expr OR expr .  (14)
+	expr : expr . PLUS expr  (16)
+	expr : expr . MINUS expr  (17)
+	expr : expr . TIMES expr  (18)
+	expr : expr . DIVIDE expr  (19)
+	expr : expr . MODULO expr  (20)
+	expr : expr . LESS_THAN_EQUAL expr  (22)
+	expr : expr . GREATER_THAN_EQUAL expr  (23)
+	expr : expr . LESS_THAN expr  (24)
+	expr : expr . GREATER_THAN expr  (25)
+	expr : expr . NOT_EQUAL_TO expr  (26)
+	expr : expr . EQUAL_TO expr  (27)
+
+	PLUS  shift 13
+	MINUS  shift 14
+	TIMES  shift 15
+	DIVIDE  shift 16
+	MODULO  shift 17
+	AND  shift 19
+	LESS_THAN  shift 21
+	LESS_THAN_EQUAL  shift 22
+	GREATER_THAN  shift 23
+	GREATER_THAN_EQUAL  shift 24
+	EQUAL_TO  shift 25
+	NOT_EQUAL_TO  shift 26
+	OR  reduce 14
+	EOF  reduce 14
+	RPAREN  reduce 14
+
+
+state 34
+	expr : expr . AND expr  (13)
+	expr : expr AND expr .  (13)
+	expr : expr . OR expr  (14)
+	expr : expr . PLUS expr  (16)
+	expr : expr . MINUS expr  (17)
+	expr : expr . TIMES expr  (18)
+	expr : expr . DIVIDE expr  (19)
+	expr : expr . MODULO expr  (20)
+	expr : expr . LESS_THAN_EQUAL expr  (22)
+	expr : expr . GREATER_THAN_EQUAL expr  (23)
+	expr : expr . LESS_THAN expr  (24)
+	expr : expr . GREATER_THAN expr  (25)
+	expr : expr . NOT_EQUAL_TO expr  (26)
+	expr : expr . EQUAL_TO expr  (27)
+
+	PLUS  shift 13
+	MINUS  shift 14
+	TIMES  shift 15
+	DIVIDE  shift 16
+	MODULO  shift 17
+	LESS_THAN  shift 21
+	LESS_THAN_EQUAL  shift 22
+	GREATER_THAN  shift 23
+	GREATER_THAN_EQUAL  shift 24
+	EQUAL_TO  shift 25
+	NOT_EQUAL_TO  shift 26
+	OR  reduce 13
+	AND  reduce 13
+	EOF  reduce 13
+	RPAREN  reduce 13
+
+
+state 35
+	expr : expr . AND expr  (13)
+	expr : expr . OR expr  (14)
+	expr : expr . PLUS expr  (16)
+	expr : expr . MINUS expr  (17)
+	expr : expr . TIMES expr  (18)
+	expr : expr . DIVIDE expr  (19)
+	expr : expr . MODULO expr  (20)
+	expr : expr . LESS_THAN_EQUAL expr  (22)
+	expr : expr . GREATER_THAN_EQUAL expr  (23)
+	expr : expr . LESS_THAN expr  (24)
+	expr : expr LESS_THAN expr .  (24)
+	expr : expr . GREATER_THAN expr  (25)
+	expr : expr . NOT_EQUAL_TO expr  (26)
+	expr : expr . EQUAL_TO expr  (27)
+
+	PLUS  shift 13
+	MINUS  shift 14
+	TIMES  shift 15
+	DIVIDE  shift 16
+	MODULO  shift 17
+	OR  reduce 24
+	AND  reduce 24
+	EOF  reduce 24
+	LESS_THAN  reduce 24
+	LESS_THAN_EQUAL  reduce 24
+	GREATER_THAN  reduce 24
+	GREATER_THAN_EQUAL  reduce 24
+	EQUAL_TO  reduce 24
+	NOT_EQUAL_TO  reduce 24
+	RPAREN  reduce 24
+
+
+state 36
+	expr : expr . AND expr  (13)
+	expr : expr . OR expr  (14)
+	expr : expr . PLUS expr  (16)
+	expr : expr . MINUS expr  (17)
+	expr : expr . TIMES expr  (18)
+	expr : expr . DIVIDE expr  (19)
+	expr : expr . MODULO expr  (20)
+	expr : expr . LESS_THAN_EQUAL expr  (22)
+	expr : expr LESS_THAN_EQUAL expr .  (22)
+	expr : expr . GREATER_THAN_EQUAL expr  (23)
+	expr : expr . LESS_THAN expr  (24)
+	expr : expr . GREATER_THAN expr  (25)
+	expr : expr . NOT_EQUAL_TO expr  (26)
+	expr : expr . EQUAL_TO expr  (27)
+
+	PLUS  shift 13
+	MINUS  shift 14
+	TIMES  shift 15
+	DIVIDE  shift 16
+	MODULO  shift 17
+	OR  reduce 22
+	AND  reduce 22
+	EOF  reduce 22
+	LESS_THAN  reduce 22
+	LESS_THAN_EQUAL  reduce 22
+	GREATER_THAN  reduce 22
+	GREATER_THAN_EQUAL  reduce 22
+	EQUAL_TO  reduce 22
+	NOT_EQUAL_TO  reduce 22
+	RPAREN  reduce 22
+
+
+state 37
+	expr : expr . AND expr  (13)
+	expr : expr . OR expr  (14)
+	expr : expr . PLUS expr  (16)
+	expr : expr . MINUS expr  (17)
+	expr : expr . TIMES expr  (18)
+	expr : expr . DIVIDE expr  (19)
+	expr : expr . MODULO expr  (20)
+	expr : expr . LESS_THAN_EQUAL expr  (22)
+	expr : expr . GREATER_THAN_EQUAL expr  (23)
+	expr : expr . LESS_THAN expr  (24)
+	expr : expr . GREATER_THAN expr  (25)
+	expr : expr GREATER_THAN expr .  (25)
+	expr : expr . NOT_EQUAL_TO expr  (26)
+	expr : expr . EQUAL_TO expr  (27)
+
+	PLUS  shift 13
+	MINUS  shift 14
+	TIMES  shift 15
+	DIVIDE  shift 16
+	MODULO  shift 17
+	OR  reduce 25
+	AND  reduce 25
+	EOF  reduce 25
+	LESS_THAN  reduce 25
+	LESS_THAN_EQUAL  reduce 25
+	GREATER_THAN  reduce 25
+	GREATER_THAN_EQUAL  reduce 25
+	EQUAL_TO  reduce 25
+	NOT_EQUAL_TO  reduce 25
+	RPAREN  reduce 25
+
+
+state 38
+	expr : expr . AND expr  (13)
+	expr : expr . OR expr  (14)
+	expr : expr . PLUS expr  (16)
+	expr : expr . MINUS expr  (17)
+	expr : expr . TIMES expr  (18)
+	expr : expr . DIVIDE expr  (19)
+	expr : expr . MODULO expr  (20)
+	expr : expr . LESS_THAN_EQUAL expr  (22)
+	expr : expr . GREATER_THAN_EQUAL expr  (23)
+	expr : expr GREATER_THAN_EQUAL expr .  (23)
+	expr : expr . LESS_THAN expr  (24)
+	expr : expr . GREATER_THAN expr  (25)
+	expr : expr . NOT_EQUAL_TO expr  (26)
+	expr : expr . EQUAL_TO expr  (27)
 
 	PLUS  shift 13
 	MINUS  shift 14
@@ -530,8 +740,78 @@ state 32
 	AND  reduce 23
 	EOF  reduce 23
 	LESS_THAN  reduce 23
+	LESS_THAN_EQUAL  reduce 23
 	GREATER_THAN  reduce 23
+	GREATER_THAN_EQUAL  reduce 23
+	EQUAL_TO  reduce 23
+	NOT_EQUAL_TO  reduce 23
 	RPAREN  reduce 23
+
+
+state 39
+	expr : expr . AND expr  (13)
+	expr : expr . OR expr  (14)
+	expr : expr . PLUS expr  (16)
+	expr : expr . MINUS expr  (17)
+	expr : expr . TIMES expr  (18)
+	expr : expr . DIVIDE expr  (19)
+	expr : expr . MODULO expr  (20)
+	expr : expr . LESS_THAN_EQUAL expr  (22)
+	expr : expr . GREATER_THAN_EQUAL expr  (23)
+	expr : expr . LESS_THAN expr  (24)
+	expr : expr . GREATER_THAN expr  (25)
+	expr : expr . NOT_EQUAL_TO expr  (26)
+	expr : expr . EQUAL_TO expr  (27)
+	expr : expr EQUAL_TO expr .  (27)
+
+	PLUS  shift 13
+	MINUS  shift 14
+	TIMES  shift 15
+	DIVIDE  shift 16
+	MODULO  shift 17
+	LESS_THAN  shift 21
+	LESS_THAN_EQUAL  shift 22
+	GREATER_THAN  shift 23
+	GREATER_THAN_EQUAL  shift 24
+	OR  reduce 27
+	AND  reduce 27
+	EOF  reduce 27
+	EQUAL_TO  reduce 27
+	NOT_EQUAL_TO  reduce 27
+	RPAREN  reduce 27
+
+
+state 40
+	expr : expr . AND expr  (13)
+	expr : expr . OR expr  (14)
+	expr : expr . PLUS expr  (16)
+	expr : expr . MINUS expr  (17)
+	expr : expr . TIMES expr  (18)
+	expr : expr . DIVIDE expr  (19)
+	expr : expr . MODULO expr  (20)
+	expr : expr . LESS_THAN_EQUAL expr  (22)
+	expr : expr . GREATER_THAN_EQUAL expr  (23)
+	expr : expr . LESS_THAN expr  (24)
+	expr : expr . GREATER_THAN expr  (25)
+	expr : expr . NOT_EQUAL_TO expr  (26)
+	expr : expr NOT_EQUAL_TO expr .  (26)
+	expr : expr . EQUAL_TO expr  (27)
+
+	PLUS  shift 13
+	MINUS  shift 14
+	TIMES  shift 15
+	DIVIDE  shift 16
+	MODULO  shift 17
+	LESS_THAN  shift 21
+	LESS_THAN_EQUAL  shift 22
+	GREATER_THAN  shift 23
+	GREATER_THAN_EQUAL  shift 24
+	OR  reduce 26
+	AND  reduce 26
+	EOF  reduce 26
+	EQUAL_TO  reduce 26
+	NOT_EQUAL_TO  reduce 26
+	RPAREN  reduce 26
 
 
 Rules never reduced:
@@ -545,4 +825,4 @@ Rules never reduced:
 
 
 59 terminals, 5 nonterminals
-25 grammar rules, 33 states
+29 grammar rules, 41 states

@@ -114,6 +114,22 @@ let rec typeOf env e = match e with
         SplatNumber, SplatNumber -> SplatBoolean
         | _ -> raise TypeError
     )
+    |SplLe (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
+        SplatNumber, SplatNumber -> SplatBoolean
+        | _ -> raise TypeError
+    )
+    |SplGe (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
+        SplatNumber, SplatNumber -> SplatBoolean
+        | _ -> raise TypeError
+    )
+    |SplNe (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
+        SplatNumber, SplatNumber -> SplatBoolean
+        | _ -> raise TypeError
+    )
+    |SplEq (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
+        SplatNumber, SplatNumber -> SplatBoolean
+        | _ -> raise TypeError
+    )
 
     (*Arithmetic*)
     |SplPlus(e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
@@ -168,6 +184,23 @@ let rec eval env e = match e with
   | (SplGt(SplNumber(n), e2))      -> let (e2',env') = (eval env e2) in (SplGt(SplNumber(n),e2'),env')
   | (SplGt(e1, e2))            -> let (e1',env') = (eval env e1) in (SplGt(e1',e2),env')
 
+  | (SplLe(SplNumber(n),SplNumber(m))) -> (SplBoolean( n <= m ) , env)
+  | (SplLe(SplNumber(n), e2))      -> let (e2',env') = (eval env e2) in (SplLe(SplNumber(n),e2'),env')
+  | (SplLe(e1, e2))            -> let (e1',env') = (eval env e1) in (SplLe(e1',e2),env')
+
+  | (SplGe(SplNumber(n),SplNumber(m))) -> (SplBoolean( n >= m ) , env)
+  | (SplGe(SplNumber(n), e2))      -> let (e2',env') = (eval env e2) in (SplGe(SplNumber(n),e2'),env')
+  | (SplGe(e1, e2))            -> let (e1',env') = (eval env e1) in (SplGe(e1',e2),env')
+
+  | (SplNe(SplNumber(n),SplNumber(m))) -> (SplBoolean( n != m ) , env)
+  | (SplNe(SplNumber(n), e2))      -> let (e2',env') = (eval env e2) in (SplNe(SplNumber(n),e2'),env')
+  | (SplNe(e1, e2))            -> let (e1',env') = (eval env e1) in (SplNe(e1',e2),env')
+
+  | (SplEq(SplNumber(n),SplNumber(m))) -> (SplBoolean( n = m ) , env)
+  | (SplEq(SplNumber(n), e2))      -> let (e2',env') = (eval env e2) in (SplEq(SplNumber(n),e2'),env')
+  | (SplEq(e1, e2))            -> let (e1',env') = (eval env e1) in (SplEq(e1',e2),env')
+  (*TODO?: Boolean equals / not_equals*)
+
   (*Arithmetic*)
   | (SplPlus(SplNumber(n),SplNumber(m))) -> (SplNumber( n +. m ) , env)
   | (SplPlus(SplNumber(n), e2))      -> let (e2',env') = (eval env e2) in (SplPlus(SplNumber(n),e2'),env')
@@ -195,38 +228,14 @@ let rec eval env e = match e with
 let rec evalloop env e = try (let (e',env') = (eval env e) in (evalloop env' e')) with Terminated -> if (isValue e) then e else raise StuckTerm  ;;
 let evalProg e = evalloop (Env []) e ;;
 
-let rec free e x = match e with
-   SplVariable(y) -> (x=y)
-  |SplNumber(n) -> false
-  |SplBoolean(b) -> false
-  |SplLt(e1,e2) -> (free e1 x) || (free e2 x)
-  |SplGt(e1,e2) -> (free e1 x) || (free e2 x)
-  |SplPlus(e1,e2) -> (free e1 x) || (free e2 x)
-  |SplMinus(e1,e2) -> (free e1 x) || (free e2 x)
-  |SplTimes(e1,e2) -> (free e1 x) || (free e2 x)
-  |SplDivide(e1,e2) -> (free e1 x) || (free e2 x)
-  |SplModulo(e1,e2) -> (free e1 x) || (free e2 x)
-;;
-
 let rename (s:string) = s^"'";;
-
-let rec subst e1 x e2 = match e2 with
-    SplVariable(y) when (x=y) -> e1
-  | SplVariable(y)            -> SplVariable(y)
-  | SplNumber(n) -> SplNumber(n)
-  | SplBoolean(b) -> SplBoolean(b)
-  | SplLt (e21, e22) -> SplLt( (subst e1 x e21) , (subst e1 x e22) )
-  | SplGt (e21, e22) -> SplGt( (subst e1 x e21) , (subst e1 x e22) )
-  | SplPlus(e21, e22) -> SplPlus( (subst e1 x e21) , (subst e1 x e22) )
-  | SplMinus(e21, e22) -> SplMinus( (subst e1 x e21) , (subst e1 x e22) )
-  | SplTimes(e21, e22) -> SplTimes( (subst e1 x e21) , (subst e1 x e22) )
-  | SplDivide(e21, e22) -> SplDivide( (subst e1 x e21) , (subst e1 x e22) )
-  | SplModulo(e21, e22) -> SplModulo( (subst e1 x e21) , (subst e1 x e22) )
- ;;
 
 let rec type_to_string tT = match tT with
   | SplatNumber -> "Number"
   | SplatBoolean -> "Boolean"
+  | SplatList -> "List"
+  | SplatStream -> "Stream"
+  | SplatString -> "String"
   | SplatFunction(tT1,tT2) -> "( "^type_to_string(tT1)^" -> "^type_to_string(tT2)^" )"
 ;;
 
