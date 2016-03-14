@@ -42,6 +42,7 @@ type splTerm =
     | SplMinusAssign of string * splTerm
     | SplTimesAssign of string * splTerm
     | SplDivideAssign of string * splTerm
+    | SplLet of string * splTerm * splTerm
 (* predefined functions *)
     | SplShow of splTerm
     | SplRange of splTerm * splTerm * splTerm

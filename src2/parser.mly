@@ -61,7 +61,7 @@ type_spec:
 ;
 
 expr:
-    | expr END_OF_STATEMENT         { $1 }
+    | LPAREN IDENT EQUALS expr RPAREN SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT { SplLet ($2, $4, $7) }
 
     | NUMBER                        { SplNumber $1 }
     | IDENT                         { SplVariable $1 }

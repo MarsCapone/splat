@@ -52,6 +52,7 @@ type splTerm =
     | SplMinusAssign of string * splTerm
     | SplTimesAssign of string * splTerm
     | SplDivideAssign of string * splTerm
+    | SplLet of string * splTerm * splTerm
 (* predefined functions *)
     | SplShow of splTerm
     | SplRange of splTerm * splTerm * splTerm
@@ -89,6 +90,7 @@ let addBinding env str thing = match env with
 let rec typeOf env e = match e with
     SplNumber (n) -> SplatNumber
     |SplBoolean (b) -> SplatBoolean
+    |SplString (s) -> SplatString
 
     (*Boolean operators*)
     |SplAnd (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
@@ -158,6 +160,11 @@ let rec typeOf env e = match e with
               SplatBoolean, SplatNumber, SplatNumber -> SplatNumber
             | SplatBoolean, SplatBoolean, SplatBoolean -> SplatBoolean
             | _ -> raise TypeError
+    )
+
+    |SplLet(e1, e2, e3) -> (
+        let (env') = (addBinding env e1 (typeOf env e2)) in
+            (typeOf env' e3)
     )
 
     |SplVariable (x) ->  (try lookup env x with LookupError -> raise TypeError)
@@ -240,6 +247,10 @@ let rec eval env e = match e with
   | (SplIfElse(SplBoolean(n), SplBoolean(m), e3))      -> let (e3',env') = (eval env e3) in (SplIfElse(SplBoolean(n),SplBoolean(m),e3),env')
   | (SplIfElse(SplBoolean(n), e2, e3))      -> let (e2',env') = (eval env e2) in (SplIfElse(SplBoolean(n),e2',e3),env')
   | (SplIfElse(e1, e2, e3))            -> let (e1',env') = (eval env e1) in (SplIfElse(e1', e2, e3) ,env')
+
+  (*Assignment*)
+  | (SplLet(n, SplNumber(m), e3)) -> let (env') = (addBinding env n (SplNumber(m))) in (e3, env')
+  | (SplLet(n, m, e3)) -> let (m', env') = (eval env m) in (SplLet(n, m', e3), env')
 
   | _ -> raise Terminated ;;
 
