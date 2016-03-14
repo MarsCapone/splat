@@ -1,0 +1,242 @@
+   0  $accept : %entry% $end
+
+   1  parser_main : expr EOF
+
+   2  type_spec : NUMBER_TYPE
+   3            | BOOLEAN_TYPE
+   4            | type_spec FUNCTION_TYPE type_spec
+   5            | LPAREN type_spec RPAREN
+
+   6  expr : NUMBER
+   7       | FALSE
+   8       | TRUE
+   9       | IDENT
+  10       | expr PLUS expr
+  11       | expr MINUS expr
+  12       | LPAREN expr RPAREN
+  13       | expr LESS_THAN expr
+  14       | expr GREATER_THAN expr
+
+  15  %entry% : '\001' parser_main
+
+state 0
+	$accept : . %entry% $end  (0)
+
+	'\001'  shift 1
+	.  error
+
+	%entry%  goto 2
+
+
+state 1
+	%entry% : '\001' . parser_main  (15)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	LPAREN  shift 5
+	TRUE  shift 6
+	FALSE  shift 7
+	.  error
+
+	parser_main  goto 8
+	expr  goto 9
+
+
+state 2
+	$accept : %entry% . $end  (0)
+
+	$end  accept
+
+
+state 3
+	expr : NUMBER .  (6)
+
+	.  reduce 6
+
+
+state 4
+	expr : IDENT .  (9)
+
+	.  reduce 9
+
+
+state 5
+	expr : LPAREN . expr RPAREN  (12)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	LPAREN  shift 5
+	TRUE  shift 6
+	FALSE  shift 7
+	.  error
+
+	expr  goto 10
+
+
+state 6
+	expr : TRUE .  (8)
+
+	.  reduce 8
+
+
+state 7
+	expr : FALSE .  (7)
+
+	.  reduce 7
+
+
+state 8
+	%entry% : '\001' parser_main .  (15)
+
+	.  reduce 15
+
+
+state 9
+	parser_main : expr . EOF  (1)
+	expr : expr . PLUS expr  (10)
+	expr : expr . MINUS expr  (11)
+	expr : expr . LESS_THAN expr  (13)
+	expr : expr . GREATER_THAN expr  (14)
+
+	PLUS  shift 11
+	MINUS  shift 12
+	LESS_THAN  shift 13
+	GREATER_THAN  shift 14
+	EOF  shift 15
+	.  error
+
+
+state 10
+	expr : expr . PLUS expr  (10)
+	expr : expr . MINUS expr  (11)
+	expr : LPAREN expr . RPAREN  (12)
+	expr : expr . LESS_THAN expr  (13)
+	expr : expr . GREATER_THAN expr  (14)
+
+	PLUS  shift 11
+	MINUS  shift 12
+	RPAREN  shift 16
+	LESS_THAN  shift 13
+	GREATER_THAN  shift 14
+	.  error
+
+
+state 11
+	expr : expr PLUS . expr  (10)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	LPAREN  shift 5
+	TRUE  shift 6
+	FALSE  shift 7
+	.  error
+
+	expr  goto 17
+
+
+state 12
+	expr : expr MINUS . expr  (11)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	LPAREN  shift 5
+	TRUE  shift 6
+	FALSE  shift 7
+	.  error
+
+	expr  goto 18
+
+
+state 13
+	expr : expr LESS_THAN . expr  (13)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	LPAREN  shift 5
+	TRUE  shift 6
+	FALSE  shift 7
+	.  error
+
+	expr  goto 19
+
+
+state 14
+	expr : expr GREATER_THAN . expr  (14)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	LPAREN  shift 5
+	TRUE  shift 6
+	FALSE  shift 7
+	.  error
+
+	expr  goto 20
+
+
+state 15
+	parser_main : expr EOF .  (1)
+
+	.  reduce 1
+
+
+state 16
+	expr : LPAREN expr RPAREN .  (12)
+
+	.  reduce 12
+
+
+state 17
+	expr : expr . PLUS expr  (10)
+	expr : expr PLUS expr .  (10)
+	expr : expr . MINUS expr  (11)
+	expr : expr . LESS_THAN expr  (13)
+	expr : expr . GREATER_THAN expr  (14)
+
+	.  reduce 10
+
+
+state 18
+	expr : expr . PLUS expr  (10)
+	expr : expr . MINUS expr  (11)
+	expr : expr MINUS expr .  (11)
+	expr : expr . LESS_THAN expr  (13)
+	expr : expr . GREATER_THAN expr  (14)
+
+	.  reduce 11
+
+
+state 19
+	expr : expr . PLUS expr  (10)
+	expr : expr . MINUS expr  (11)
+	expr : expr . LESS_THAN expr  (13)
+	expr : expr LESS_THAN expr .  (13)
+	expr : expr . GREATER_THAN expr  (14)
+
+	PLUS  shift 11
+	MINUS  shift 12
+	RPAREN  reduce 13
+	EOF  reduce 13
+
+
+state 20
+	expr : expr . PLUS expr  (10)
+	expr : expr . MINUS expr  (11)
+	expr : expr . LESS_THAN expr  (13)
+	expr : expr . GREATER_THAN expr  (14)
+	expr : expr GREATER_THAN expr .  (14)
+
+	PLUS  shift 11
+	MINUS  shift 12
+	RPAREN  reduce 14
+	EOF  reduce 14
+
+
+Rules never reduced:
+	type_spec : NUMBER_TYPE  (2)
+	type_spec : BOOLEAN_TYPE  (3)
+	type_spec : type_spec FUNCTION_TYPE type_spec  (4)
+	type_spec : LPAREN type_spec RPAREN  (5)
+
+
+31 terminals, 5 nonterminals
+16 grammar rules, 21 states

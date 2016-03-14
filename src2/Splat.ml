@@ -95,6 +95,10 @@ let rec typeOf env e = match e with
         SplatNumber, SplatNumber -> SplatBoolean
             | _ -> raise TypeError
     )
+    |SplGt (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
+        SplatNumber, SplatNumber -> SplatBoolean
+            | _ -> raise TypeError
+    )
 
     |SplPlus(e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatNumber
@@ -119,6 +123,10 @@ let rec eval env e = match e with
   | (SplLt(SplNumber(n), e2))      -> let (e2',env') = (eval env e2) in (SplLt(SplNumber(n),e2'),env')
   | (SplLt(e1, e2))            -> let (e1',env') = (eval env e1) in (SplLt(e1',e2),env')
 
+  | (SplGt(SplNumber(n),SplNumber(m))) -> (SplBoolean( n > m ) , env)
+  | (SplGt(SplNumber(n), e2))      -> let (e2',env') = (eval env e2) in (SplGt(SplNumber(n),e2'),env')
+  | (SplGt(e1, e2))            -> let (e1',env') = (eval env e1) in (SplGt(e1',e2),env')
+
   | (SplPlus(SplNumber(n),SplNumber(m))) -> (SplNumber( n +. m ) , env)
   | (SplPlus(SplNumber(n), e2))      -> let (e2',env') = (eval env e2) in (SplPlus(SplNumber(n),e2'),env')
   | (SplPlus(e1, e2))            -> let (e1',env') = (eval env e1) in (SplPlus(e1', e2) ,env')
@@ -138,6 +146,7 @@ let rec free e x = match e with
   |SplNumber(n) -> false
   |SplBoolean(b) -> false
   |SplLt(e1,e2) -> (free e1 x) || (free e2 x)
+  |SplGt(e1,e2) -> (free e1 x) || (free e2 x)
   |SplPlus(e1,e2) -> (free e1 x) || (free e2 x)
   |SplMinus(e1,e2) -> (free e1 x) || (free e2 x)
 ;;
@@ -150,6 +159,7 @@ let rec subst e1 x e2 = match e2 with
   | SplNumber(n) -> SplNumber(n)
   | SplBoolean(b) -> SplBoolean(b)
   | SplLt (e21, e22) -> SplLt( (subst e1 x e21) , (subst e1 x e22) )
+  | SplGt (e21, e22) -> SplGt( (subst e1 x e21) , (subst e1 x e22) )
   | SplPlus(e21, e22) -> SplPlus( (subst e1 x e21) , (subst e1 x e22) )
   | SplMinus(e21, e22) -> SplMinus( (subst e1 x e21) , (subst e1 x e22) )
  ;;

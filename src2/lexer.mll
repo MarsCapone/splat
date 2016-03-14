@@ -5,9 +5,15 @@ open Parser        (* The type token is defined in parser.mli *)
 rule lexer_main = parse
       [' ' '\t' '\n']     { lexer_main lexbuf }     (* skip blanks *)
     | '-'?(['0'-'9']*['.'])?['0'-'9']+ as lsm { NUMBER(float_of_string lsm) }
+
+(*Types*)
     | "boolean"   { BOOLEAN_TYPE }
     | "number"    { NUMBER_TYPE }
-    | "->"     { FUNTYPE }
+    | "string"    { STRING_TYPE }
+    | "stream"    { STREAM_TYPE }
+    | "list"      { LIST_TYPE }
+    | "function"  { FUNCTION_TYPE }
+
     | "let"    { LET }
     | "in"     { IN }
     | "if"     { IF }
@@ -18,7 +24,8 @@ rule lexer_main = parse
     | ['a'-'z']+ as lxm { IDENT(lxm) }
     | '+'      { PLUS }
     | '-'      { MINUS }
-    | '<'      { LESSTHAN }
+    | '<'      { LESS_THAN }
+    | '>'      { GREATER_THAN }
     | ':'      { COLON }
     | '('      { LPAREN }
     | ')'      { RPAREN }
