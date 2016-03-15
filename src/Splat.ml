@@ -226,14 +226,21 @@ let rec typeOf env e = match e with
                 SplatFunction(tT, tU) ->
                 (
                     match tT = ty2 with
-                        true -> tT
+                        true -> ty1
                         |false -> raise (TypeError "APPLY Function does not accept type")
                 )
                 | _ -> raise (TypeError (type_to_string(ty1)^" APPLY "^(type_to_string(ty2))))
         )
     )
 
-    |SplAbs (tT, x, e) ->  SplatFunction(tT, typeOf (addBinding env x tT) e)
+    |SplAbs (tT, x, e) ->  (
+        let ty1 = typeOf (addBinding env x tT) e in
+        (
+            match ty1 with
+                SplatFunction(p, r) -> ty1
+                | _ -> SplatFunction(tT, ty1)
+        )
+    )
 
     | SplShow (e1) -> (match (typeOf env e1) with
         SplatNumber -> SplatVoid

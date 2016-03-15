@@ -71,12 +71,13 @@ type_spec:
 
 expr:
     | LET SQUARE_BRACE_LEFT IDENT EQUALS expr SQUARE_BRACE_RIGHT SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT { SplLet ($3, $5, $8) }
-    | expr APPLY expr               { SplApply ($1, $3) }
 
     | NUMBER                        { SplNumber $1 }
     | IDENT                         { SplVariable $1 }
 
     | FUNCTION_TYPE LPAREN type_spec IDENT RPAREN SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT { SplAbs ($3, $4, $7) }
+    | LPAREN expr RPAREN            { $2 }
+    | expr APPLY expr               { SplApply ($1, $3) }
 
     /*Booleans*/
     | FALSE                         { SplBoolean false }
@@ -92,7 +93,6 @@ expr:
     | expr DIVIDE expr              { SplDivide ($1, $3) }
     | expr MODULO expr              { SplModulo ($1, $3) }
     | expr POWER_OF expr            { SplPower ($1, $3) }
-    | LPAREN expr RPAREN            { $2 }
 
     /*Comparisons*/
     | expr LESS_THAN_EQUAL expr       { SplLe ($1, $3) }
