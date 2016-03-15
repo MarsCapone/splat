@@ -63,7 +63,6 @@ type_spec:
     | BOOLEAN_TYPE      { SplatBoolean }
     | STRING_TYPE       { SplatString }
     | LIST_TYPE         { SplatList }
-    | STREAM_TYPE       { SplatStream }
     | FUNCTION_TYPE type_spec type_spec { SplatFunction ($2, $3) }
     | LPAREN type_spec RPAREN { $2 }
 ;

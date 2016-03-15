@@ -77,11 +77,12 @@ let rec isValue e = match e with
     | _ -> false
 ;;
 
+
+
 let rec type_to_string tT = match tT with
   | SplatNumber -> "Number"
   | SplatBoolean -> "Boolean"
   | SplatList -> "List"
-  | SplatStream -> "Stream"
   | SplatString -> "String"
   | SplatFunction(tT1,tT2) -> "( "^type_to_string(tT1)^" -> "^type_to_string(tT2)^" )"
 ;;
@@ -180,7 +181,7 @@ let rec typeOf env e = match e with
     | SplCons(e1, e2) -> (
         match (typeOf env e1), (typeOf env e2) with
             _, SplatList -> SplatList
-            | _ -> raise TypeError
+            | _ -> raise (TypeError "CONS")
     )
     | SplHead (e1) -> (
         typeOf env e1
@@ -188,7 +189,7 @@ let rec typeOf env e = match e with
     | SplTail (e1) -> (
         match (typeOf env e1) with
             SplatList -> SplatList
-            | _ -> raise TypeError
+            | _ -> raise (TypeError "TAIL")
     )
 
     (*Flow control*)
@@ -343,13 +344,6 @@ let evalProg e = evalloop (Env []) e ;;
 
 let rename (s:string) = s^"'";;
 
-let rec type_to_string tT = match tT with
-  | SplatNumber -> "Number"
-  | SplatBoolean -> "Boolean"
-  | SplatList -> "List"
-  | SplatString -> "String"
-  | SplatFunction(tT1,tT2) -> "( "^type_to_string(tT1)^" -> "^type_to_string(tT2)^" )"
-;;
 
 let rec print_list = function
     [] -> ()
