@@ -3,10 +3,10 @@
 open Parser        (* The type token is defined in parser.mli *)
 }
 rule lexer_main = parse
-    [' ' '\t']     { white_space lexbuf }     (* skip blanks *)
+    [' ' '\t' '\n']     { lexer_main lexbuf }     (* skip blanks *)
+
 (*Variables*)
-    | '-'?(['0'-'9']*['.'])?['0'-'9']+ as lsm { NUMBER(float_of_string lxm) }
-    | ['a'-'z''A'-'Z''0'-'9']+ as lxm { IDENT(lxm) }
+    | '-'?(['0'-'9']*['.'])?['0'-'9']+ as lsm { NUMBER(float_of_string lsm) }
 
 (*Types*)
     | "boolean"   { BOOLEAN_TYPE }
@@ -17,9 +17,8 @@ rule lexer_main = parse
     | "function"  { FUNCTION_TYPE }
 
 (*Flow*)
-    | "function"  { FUNCTION }
-    | "for"     { FOR }
     | "forever" { FOREVER }
+    | "for"     { FOR }
     | "in"     { IN }
     | "if"     { IF }
     | "then"   { THEN }
@@ -29,43 +28,44 @@ rule lexer_main = parse
     | "break"  { BREAK }
     | "continue" { CONTINUE }
     | "return" { RETURN }
+    | "let"    { LET }
 
 (*Predefined*)
     | "true"   { TRUE }
     | "false"  { FALSE }
     | "stdin"  { STDIN }
-    | "¬"    { END_OF_STATEMENT }
+    | "¬"      { END_OF_STATEMENT }
     | eof      { EOF }
 
 (*Operators*)
     | '+'      { PLUS }
     | '-'      { MINUS }
-    | '*'      { MULTIPLY }
+    | '*'      { TIMES }
     | '/'      { DIVIDE }
     | '%'      { MODULO }
-    | '!'      { NOT }
+    | "not"      { NOT }
     | '^'      { POWER_OF }
     | "or"     { OR }
     | "and"    { AND }
 
 (*Comparators*)
-    | '<'      { LESS_THAN }
-    | '>'      { GREATER_THAN }
     | "<="     { LESS_THAN_EQUAL }
     | ">="     { GREATER_THAN_EQUAL }
     | "=="     { EQUAL_TO }
     | "!="     { NOT_EQUAL_TO }
+    | '<'      { LESS_THAN }
+    | '>'      { GREATER_THAN }
 
 (*Scope*)
     | '{'      { SCOPE_BRACE_LEFT }
     | '}'      { SCOPE_BRACE_RIGHT }
 
 (*Assignment*)
-    | '='      { EQUALS }
     | "+="     { PLUS_EQUALS }
     | "-="     { MINUS_EQUALS }
     | "*="     { MULTIPLY_EQUALS }
     | "/="     { DIVIDE_EQUALS }
+    | '='      { EQUALS }
 
 (*Functions*)
     | "show"      { SHOW }
@@ -80,3 +80,5 @@ rule lexer_main = parse
     | ','     { SEPARATOR }
     | '"'     { STRING_WRAPPER }
     | '\\'    { ESCAPE_CHAR }
+
+    | ['a'-'z''A'-'Z''0'-'9']+ as lxm { IDENT(lxm) }

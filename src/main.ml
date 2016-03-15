@@ -9,7 +9,7 @@ let parseProgram c =
             parser_main lexer_main lexbuf
     with Parsing.Parse_error -> failwith "Parse failure!" ;;
 
-
+Parsing.set_trace true;
 let arg = ref stdin in
 let setProg p = arg := open_in p in
 let usage = "./main PROGRAM_FILE" in
@@ -18,6 +18,6 @@ let parsedProg = parseProgram !arg in
 let () = print_string "Program Parsed" ; print_newline() in
 let _ = typeProg parsedProg in
 let () = print_string "Program Type Checked" ; print_newline() in
-let result = evalProg parsedProg in
-let () = print_string "Program Evaluated  to ==> " ; print_res result ; print_newline() in
+let result1 = evalProg parsedProg in
+let () = print_string "Program Evaluated to ==> " ; print_res result1 ; print_newline() in
 flush stdout

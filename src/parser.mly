@@ -6,7 +6,7 @@
 %token <string> IDENT
 %token BOOLEAN_TYPE NUMBER_TYPE STRING_TYPE STREAM_TYPE LIST_TYPE FUNCTION_TYPE
 /*Operators*/
-%token PLUS MINUS MULTIPLY DIVIDE MODULO NOT POWER_OF OR AND
+%token PLUS MINUS TIMES DIVIDE MODULO NOT POWER_OF OR AND
 %token FOR FOREVER IN
 %token IF THEN ELSE
 %token WHILE
@@ -25,10 +25,11 @@
 /*Functions*/
 %token SHOW RANGE SPLIT
 /*Other*/
-%token SQUARE_BRACE_LEFT SQUARE_BRACE_RIGHT
+%token SQUARE_BRACE_LEFT SQUARE_BRACE_RIGHT LET
 %token SEPARATOR
 %token STRING_WRAPPER
 %token ESCAPE_CHAR
+%token LPAREN RPAREN
 /*Associativity and precedence*/
 %left SEPARATOR             /*Lowest precedence*/
 %right EQUALS PLUS_EQUALS MINUS_EQUALS MULTIPLY_EQUALS DIVIDE_EQUALS
@@ -37,64 +38,58 @@
 %left EQUAL_TO NOT_EQUAL_TO
 %left LESS_THAN LESS_THAN_EQUAL GREATER_THAN GREATER_THAN_EQUAL
 %left PLUS MINUS
-%left MULTIPLY DIVIDE MODULO
+%left DIVIDE MODULO
+%left TIMES
 %right POWER_OF NOT
 %nonassoc IF THEN ELSE WHILE FOR FOREVER IN
 
-%start parser_main
-%type <Splat.splatTerm> parser_main
-%type <Splat.splatType> type_spec
+%start parser_main             /* the entry point */
+%type <Splat.splTerm> parser_main
+%type <Splat.splType> type_spec
 %%
-parser_main: expr EOF { $1 }
+parser_main:
+    expr EOF { $1 }
 ;
 type_spec:
-    NUMBER_TYPE         { splatNumber }
-    | BOOLEAN_TYPE      { splatBoolean }
-    | STRING_TYPE       { splatString }
-    | LIST_TYPE         { splatList }
-    | STREAM_TYPE       { splatStream }
-    | FUNCTION_TYPE     { splatFunction }
+    NUMBER_TYPE         { SplatNumber }
+    | BOOLEAN_TYPE      { SplatBoolean }
+    | STRING_TYPE       { SplatString }
+    | LIST_TYPE         { SplatList }
+    | STREAM_TYPE       { SplatStream }
+    | FUNCTION_TYPE type_spec IDENT type_spec    { SplatFunction ($2, $4) }
     | LPAREN type_spec RPAREN { $2 }
 ;
 
-boolean_expr:
-    TRUE                                    { splBoolean true }
-    | FALSE                                 { splBoolean false }
-    | boolean_expr AND boolean_expr         { splAnd ($1, $3) }
-    | boolean_expr OR boolean_expr          { splOr ($1, $3) }
-    | NOT boolean_expr                      { splNot $2 }
-    | comparator_expr
-;
+expr:
+    | LET SQUARE_BRACE_LEFT IDENT EQUALS expr SQUARE_BRACE_RIGHT SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT { SplLet ($3, $5, $8) }
 
-comparator_expr:
-    math_expr LESS_THAN_EQUAL math_expr     { splLe ($1, $3) }
-    math_expr GREATER_THAN_EQUAL math_expr  { splGe ($1, $3) }
-    math_expr LESS_THAN math_expr           { splLt ($1, $3) }
-    math_expr GREATER_THAN math_expr        { splGt ($1, $3) }
-    math_expr NOT_EQUAL_TO math_expr        { splNe ($1, $3) }
-    math_expr EQUAL_TO math_expr            { splEq ($1, $3) }
-;
+    | NUMBER                        { SplNumber $1 }
+    | IDENT                         { SplVariable $1 }
 
-math_expr:
-    NUMBER                                  { splNum $1 }
-    | math_expr DIVIDE math_expr            { splDivide ($1, $3) }
-    | math_expr MULTIPLY math_expr          { splTimes ($1, $3) }
-    | math_expr MINUS math_expr             { splMinus ($1, $3) }
-    | math_expr PLUS math_expr              { splPlus ($1, $3) }
-    | math_expr MODULO math_expr            { splModulo ($1, $3) }
-    | math_expr POWER_OF math_expr          { splPower ($1, $3) }
-;
+    /*Booleans*/
+    | FALSE                         { SplBoolean false }
+    | TRUE                          { SplBoolean true }
+    | expr AND expr                 { SplAnd ($1, $3) }
+    | expr OR expr                  { SplOr ($1, $3) }
+    | NOT expr                      { SplNot $2 }
 
-switch_contents_expr:
-(* Not sure if this is right, but how else to do it? *)
-    comparator_expr SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT switch_contents_expr { splIf ($1, $3) }
-    | SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT       { $2 }
+    /*Arithmetic*/
+    | expr PLUS expr                { SplPlus ($1, $3) }
+    | expr MINUS expr               { SplMinus ($1, $3) }
+    | expr TIMES expr               { SplTimes ($1, $3) }
+    | expr DIVIDE expr              { SplDivide ($1, $3) }
+    | expr MODULO expr              { SplModulo ($1, $3) }
+    | expr POWER_OF expr            { SplPower ($1, $3) }
+    | LPAREN expr RPAREN            { $2 }
 
-flow_expr:
-    FOR expr IN expr SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT { splFor ($2, $4, $6)}
-    | FOREVER SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT     { splForever $3 }
-    | WHILE expr SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  { splWhile ($2, $4) }
-    | IF expr SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT ELSE SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT      { splIfElse ($2, $4, $8) }
-    | IF expr SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT       { splIf ($2, $4) }
-    | SWITCH expr SCOPE_BRACE_LEFT switch_contents_expr SCOPE_BRACE_RIGHT   { splSwitch ($2, $4) }
+    /*Comparisons*/
+    | expr LESS_THAN_EQUAL expr       { SplLe ($1, $3) }
+    | expr GREATER_THAN_EQUAL expr    { SplGe ($1, $3) }
+    | expr LESS_THAN expr             { SplLt ($1, $3) }
+    | expr GREATER_THAN expr          { SplGt ($1, $3) }
+    | expr NOT_EQUAL_TO expr          { SplNe ($1, $3) }
+    | expr EQUAL_TO expr              { SplEq ($1, $3) }
+
+    /*Flow control*/
+    | IF expr SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT ELSE SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT      { SplIfElse ($2, $4, $8) }
 ;
