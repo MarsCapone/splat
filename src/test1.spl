@@ -1,7 +1,1 @@
-let [add = function (number a) {
-    function (number b) {
-        a + b
-    }
-}]{
-    add $15.6 $90.3
-}
+(5 + 6) :: []
