@@ -96,7 +96,9 @@ let rec print_list = function
     | SplNumber(e) :: l -> print_float e; print_string " "; print_list l
     | SplBoolean(b) :: l -> print_string (if b then "true " else "false "); print_list l
     | SplList(a) :: l -> print_string "["; print_list a; print_string "]"; print_list l
-    | SplString(s) :: l -> print_string s 
+    | SplString(s) :: l -> print_string s
+    | SplVoid(v) :: l -> print_string "void"
+    | SplAbs(tT, x, e) :: l -> print_string "function:"; print_string (type_to_string tT)
 
 (* Type of Environments *)
 
