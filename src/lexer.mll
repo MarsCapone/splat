@@ -48,6 +48,8 @@ rule lexer_main = parse
     | '^'      { POWER_OF }
     | "or"     { OR }
     | "and"    { AND }
+    | "::"      { CONS }
+    | "[]"      { EMPTY_LIST }
 
 (*Comparators*)
     | "<="     { LESS_THAN_EQUAL }
@@ -72,6 +74,8 @@ rule lexer_main = parse
     | "show"      { SHOW }
     | "range"     { RANGE }
     | "split"     { SPLIT }
+    | "head"      { HEAD }
+    | "tail"      { TAIL }
 
 (*Other*)
     | '['     { SQUARE_BRACE_LEFT }
