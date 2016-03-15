@@ -1,5 +1,7 @@
-function (number x) {
-    function (number y) {
-        y
+let [add = function (number a) {
+    function (number b) {
+        a + b
     }
-} $5
+}]{
+    add $15.6 $90.3
+}
