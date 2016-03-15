@@ -94,9 +94,6 @@ let rec type_to_string tT = match tT with
 let rec print_list = function
     [] -> print_string ""
     | SplNumber(e) :: l -> print_float e; print_string " "; print_list l
-    | SplBoolean(b) :: l -> print_string (if b then "true " else "false "); print_list l
-    | SplList(a) :: l -> print_string "["; print_list a; print_string "]"; print_list l
-    | SplString(s) :: l -> print_string s 
 
 (* Type of Environments *)
 
@@ -338,7 +335,6 @@ let rec eval env e = match e with
 
   | (SplCons(SplNumber(n), SplList(m))) -> (SplList( SplNumber(n) :: m ), env)
   | (SplCons(SplNumber(n), e2)) -> let (e2', env') = (eval env e2) in (SplCons(SplNumber(n), e2'), env')
-  | (SplCons(e1, e2) when (isValue(e1))
 
   | (SplHead(SplList(n))) -> (match n with
         SplNumber(h) :: _ -> (SplNumber(h), env)
@@ -365,8 +361,8 @@ let rec eval env e = match e with
 
   (*Predefined functions*)
   | (SplShow(SplNumber n)) -> (SplVoid(print_float n; print_string "\n"), env)
-  | (SplShow(SplBoolean n)) -> (SplVoid(print_string (if n then "true" else "false"); print_string "\n"), env)
-  | (SplShow(SplList(n))) -> (SplVoid(print_list n; print_string "\n"), env)
+  | (SplShow(SplBoolean n)) -> (SplVoid(print_string (if n then "true" else "false")), env)
+  | (SplShow(SplList(n))) -> (SplVoid(print_list n), env)
   | (SplShow(e1)) -> let (e1', env') = (eval env e1) in (SplShow(e1'), env')
 
   | _ -> raise Terminated ;;

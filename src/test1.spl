@@ -1,1 +1,11 @@
+<<<<<<< HEAD
 show true
+=======
+let [add = function (number a) {
+    function (number b) {
+        a + b
+    }
+}]{
+    add $15.6 $90.3
+}
+>>>>>>> parent of d3c3bd3... Fix cons only accepting numbers
