@@ -1,0 +1,1640 @@
+   0  $accept : %entry% $end
+
+   1  parser_main : expr EOF
+
+   2  type_spec : NUMBER_TYPE
+   3            | BOOLEAN_TYPE
+   4            | STRING_TYPE
+   5            | LIST_TYPE
+   6            | STREAM_TYPE
+   7            | FUNCTION_TYPE type_spec type_spec
+   8            | LPAREN type_spec RPAREN
+
+   9  expr : LET SQUARE_BRACE_LEFT IDENT EQUALS expr SQUARE_BRACE_RIGHT SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT
+  10       | expr APPLY expr
+  11       | NUMBER
+  12       | IDENT
+  13       | FUNCTION_TYPE LPAREN type_spec IDENT RPAREN SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT
+  14       | FALSE
+  15       | TRUE
+  16       | expr AND expr
+  17       | expr OR expr
+  18       | NOT expr
+  19       | expr PLUS expr
+  20       | expr MINUS expr
+  21       | expr TIMES expr
+  22       | expr DIVIDE expr
+  23       | expr MODULO expr
+  24       | expr POWER_OF expr
+  25       | LPAREN expr RPAREN
+  26       | expr LESS_THAN_EQUAL expr
+  27       | expr GREATER_THAN_EQUAL expr
+  28       | expr LESS_THAN expr
+  29       | expr GREATER_THAN expr
+  30       | expr NOT_EQUAL_TO expr
+  31       | expr EQUAL_TO expr
+  32       | IF expr SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT ELSE SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT
+
+  33  %entry% : '\001' parser_main
+
+state 0
+	$accept : . %entry% $end  (0)
+
+	'\001'  shift 1
+	.  error
+
+	%entry%  goto 2
+
+
+state 1
+	%entry% : '\001' . parser_main  (33)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	parser_main  goto 12
+	expr  goto 13
+
+
+state 2
+	$accept : %entry% . $end  (0)
+
+	$end  accept
+
+
+state 3
+	expr : NUMBER .  (11)
+
+	.  reduce 11
+
+
+state 4
+	expr : IDENT .  (12)
+
+	.  reduce 12
+
+
+state 5
+	expr : FUNCTION_TYPE . LPAREN type_spec IDENT RPAREN SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  (13)
+
+	LPAREN  shift 14
+	.  error
+
+
+state 6
+	expr : NOT . expr  (18)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 15
+
+
+state 7
+	expr : IF . expr SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT ELSE SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  (32)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 16
+
+
+state 8
+	expr : TRUE .  (15)
+
+	.  reduce 15
+
+
+state 9
+	expr : FALSE .  (14)
+
+	.  reduce 14
+
+
+state 10
+	expr : LET . SQUARE_BRACE_LEFT IDENT EQUALS expr SQUARE_BRACE_RIGHT SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  (9)
+
+	SQUARE_BRACE_LEFT  shift 17
+	.  error
+
+
+state 11
+	expr : LPAREN . expr RPAREN  (25)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 18
+
+
+state 12
+	%entry% : '\001' parser_main .  (33)
+
+	.  reduce 33
+
+
+state 13
+	parser_main : expr . EOF  (1)
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+
+	PLUS  shift 19
+	MINUS  shift 20
+	TIMES  shift 21
+	DIVIDE  shift 22
+	MODULO  shift 23
+	POWER_OF  shift 24
+	OR  shift 25
+	AND  shift 26
+	APPLY  shift 27
+	EOF  shift 28
+	LESS_THAN  shift 29
+	LESS_THAN_EQUAL  shift 30
+	GREATER_THAN  shift 31
+	GREATER_THAN_EQUAL  shift 32
+	EQUAL_TO  shift 33
+	NOT_EQUAL_TO  shift 34
+	.  error
+
+
+state 14
+	expr : FUNCTION_TYPE LPAREN . type_spec IDENT RPAREN SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  (13)
+
+	BOOLEAN_TYPE  shift 35
+	NUMBER_TYPE  shift 36
+	STRING_TYPE  shift 37
+	STREAM_TYPE  shift 38
+	LIST_TYPE  shift 39
+	FUNCTION_TYPE  shift 40
+	LPAREN  shift 41
+	.  error
+
+	type_spec  goto 42
+
+
+state 15
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : NOT expr .  (18)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+
+	POWER_OF  shift 24
+	PLUS  reduce 18
+	MINUS  reduce 18
+	TIMES  reduce 18
+	DIVIDE  reduce 18
+	MODULO  reduce 18
+	OR  reduce 18
+	AND  reduce 18
+	APPLY  reduce 18
+	EOF  reduce 18
+	LESS_THAN  reduce 18
+	LESS_THAN_EQUAL  reduce 18
+	GREATER_THAN  reduce 18
+	GREATER_THAN_EQUAL  reduce 18
+	EQUAL_TO  reduce 18
+	NOT_EQUAL_TO  reduce 18
+	SCOPE_BRACE_LEFT  reduce 18
+	SCOPE_BRACE_RIGHT  reduce 18
+	SQUARE_BRACE_RIGHT  reduce 18
+	RPAREN  reduce 18
+
+
+state 16
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+	expr : IF expr . SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT ELSE SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  (32)
+
+	PLUS  shift 19
+	MINUS  shift 20
+	TIMES  shift 21
+	DIVIDE  shift 22
+	MODULO  shift 23
+	POWER_OF  shift 24
+	OR  shift 25
+	AND  shift 26
+	APPLY  shift 27
+	LESS_THAN  shift 29
+	LESS_THAN_EQUAL  shift 30
+	GREATER_THAN  shift 31
+	GREATER_THAN_EQUAL  shift 32
+	EQUAL_TO  shift 33
+	NOT_EQUAL_TO  shift 34
+	SCOPE_BRACE_LEFT  shift 43
+	.  error
+
+
+state 17
+	expr : LET SQUARE_BRACE_LEFT . IDENT EQUALS expr SQUARE_BRACE_RIGHT SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  (9)
+
+	IDENT  shift 44
+	.  error
+
+
+state 18
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : LPAREN expr . RPAREN  (25)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+
+	PLUS  shift 19
+	MINUS  shift 20
+	TIMES  shift 21
+	DIVIDE  shift 22
+	MODULO  shift 23
+	POWER_OF  shift 24
+	OR  shift 25
+	AND  shift 26
+	APPLY  shift 27
+	LESS_THAN  shift 29
+	LESS_THAN_EQUAL  shift 30
+	GREATER_THAN  shift 31
+	GREATER_THAN_EQUAL  shift 32
+	EQUAL_TO  shift 33
+	NOT_EQUAL_TO  shift 34
+	RPAREN  shift 45
+	.  error
+
+
+state 19
+	expr : expr PLUS . expr  (19)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 46
+
+
+state 20
+	expr : expr MINUS . expr  (20)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 47
+
+
+state 21
+	expr : expr TIMES . expr  (21)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 48
+
+
+state 22
+	expr : expr DIVIDE . expr  (22)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 49
+
+
+state 23
+	expr : expr MODULO . expr  (23)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 50
+
+
+state 24
+	expr : expr POWER_OF . expr  (24)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 51
+
+
+state 25
+	expr : expr OR . expr  (17)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 52
+
+
+state 26
+	expr : expr AND . expr  (16)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 53
+
+
+state 27
+	expr : expr APPLY . expr  (10)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 54
+
+
+state 28
+	parser_main : expr EOF .  (1)
+
+	.  reduce 1
+
+
+state 29
+	expr : expr LESS_THAN . expr  (28)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 55
+
+
+state 30
+	expr : expr LESS_THAN_EQUAL . expr  (26)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 56
+
+
+state 31
+	expr : expr GREATER_THAN . expr  (29)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 57
+
+
+state 32
+	expr : expr GREATER_THAN_EQUAL . expr  (27)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 58
+
+
+state 33
+	expr : expr EQUAL_TO . expr  (31)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 59
+
+
+state 34
+	expr : expr NOT_EQUAL_TO . expr  (30)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 60
+
+
+state 35
+	type_spec : BOOLEAN_TYPE .  (3)
+
+	.  reduce 3
+
+
+state 36
+	type_spec : NUMBER_TYPE .  (2)
+
+	.  reduce 2
+
+
+state 37
+	type_spec : STRING_TYPE .  (4)
+
+	.  reduce 4
+
+
+state 38
+	type_spec : STREAM_TYPE .  (6)
+
+	.  reduce 6
+
+
+state 39
+	type_spec : LIST_TYPE .  (5)
+
+	.  reduce 5
+
+
+state 40
+	type_spec : FUNCTION_TYPE . type_spec type_spec  (7)
+
+	BOOLEAN_TYPE  shift 35
+	NUMBER_TYPE  shift 36
+	STRING_TYPE  shift 37
+	STREAM_TYPE  shift 38
+	LIST_TYPE  shift 39
+	FUNCTION_TYPE  shift 40
+	LPAREN  shift 41
+	.  error
+
+	type_spec  goto 61
+
+
+state 41
+	type_spec : LPAREN . type_spec RPAREN  (8)
+
+	BOOLEAN_TYPE  shift 35
+	NUMBER_TYPE  shift 36
+	STRING_TYPE  shift 37
+	STREAM_TYPE  shift 38
+	LIST_TYPE  shift 39
+	FUNCTION_TYPE  shift 40
+	LPAREN  shift 41
+	.  error
+
+	type_spec  goto 62
+
+
+state 42
+	expr : FUNCTION_TYPE LPAREN type_spec . IDENT RPAREN SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  (13)
+
+	IDENT  shift 63
+	.  error
+
+
+state 43
+	expr : IF expr SCOPE_BRACE_LEFT . expr SCOPE_BRACE_RIGHT ELSE SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  (32)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 64
+
+
+state 44
+	expr : LET SQUARE_BRACE_LEFT IDENT . EQUALS expr SQUARE_BRACE_RIGHT SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  (9)
+
+	EQUALS  shift 65
+	.  error
+
+
+state 45
+	expr : LPAREN expr RPAREN .  (25)
+
+	.  reduce 25
+
+
+state 46
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr PLUS expr .  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+
+	TIMES  shift 21
+	DIVIDE  shift 22
+	MODULO  shift 23
+	POWER_OF  shift 24
+	APPLY  shift 27
+	PLUS  reduce 19
+	MINUS  reduce 19
+	OR  reduce 19
+	AND  reduce 19
+	EOF  reduce 19
+	LESS_THAN  reduce 19
+	LESS_THAN_EQUAL  reduce 19
+	GREATER_THAN  reduce 19
+	GREATER_THAN_EQUAL  reduce 19
+	EQUAL_TO  reduce 19
+	NOT_EQUAL_TO  reduce 19
+	SCOPE_BRACE_LEFT  reduce 19
+	SCOPE_BRACE_RIGHT  reduce 19
+	SQUARE_BRACE_RIGHT  reduce 19
+	RPAREN  reduce 19
+
+
+state 47
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr MINUS expr .  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+
+	TIMES  shift 21
+	DIVIDE  shift 22
+	MODULO  shift 23
+	POWER_OF  shift 24
+	APPLY  shift 27
+	PLUS  reduce 20
+	MINUS  reduce 20
+	OR  reduce 20
+	AND  reduce 20
+	EOF  reduce 20
+	LESS_THAN  reduce 20
+	LESS_THAN_EQUAL  reduce 20
+	GREATER_THAN  reduce 20
+	GREATER_THAN_EQUAL  reduce 20
+	EQUAL_TO  reduce 20
+	NOT_EQUAL_TO  reduce 20
+	SCOPE_BRACE_LEFT  reduce 20
+	SCOPE_BRACE_RIGHT  reduce 20
+	SQUARE_BRACE_RIGHT  reduce 20
+	RPAREN  reduce 20
+
+
+state 48
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr TIMES expr .  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+
+	POWER_OF  shift 24
+	APPLY  shift 27
+	PLUS  reduce 21
+	MINUS  reduce 21
+	TIMES  reduce 21
+	DIVIDE  reduce 21
+	MODULO  reduce 21
+	OR  reduce 21
+	AND  reduce 21
+	EOF  reduce 21
+	LESS_THAN  reduce 21
+	LESS_THAN_EQUAL  reduce 21
+	GREATER_THAN  reduce 21
+	GREATER_THAN_EQUAL  reduce 21
+	EQUAL_TO  reduce 21
+	NOT_EQUAL_TO  reduce 21
+	SCOPE_BRACE_LEFT  reduce 21
+	SCOPE_BRACE_RIGHT  reduce 21
+	SQUARE_BRACE_RIGHT  reduce 21
+	RPAREN  reduce 21
+
+
+state 49
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr DIVIDE expr .  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+
+	TIMES  shift 21
+	POWER_OF  shift 24
+	APPLY  shift 27
+	PLUS  reduce 22
+	MINUS  reduce 22
+	DIVIDE  reduce 22
+	MODULO  reduce 22
+	OR  reduce 22
+	AND  reduce 22
+	EOF  reduce 22
+	LESS_THAN  reduce 22
+	LESS_THAN_EQUAL  reduce 22
+	GREATER_THAN  reduce 22
+	GREATER_THAN_EQUAL  reduce 22
+	EQUAL_TO  reduce 22
+	NOT_EQUAL_TO  reduce 22
+	SCOPE_BRACE_LEFT  reduce 22
+	SCOPE_BRACE_RIGHT  reduce 22
+	SQUARE_BRACE_RIGHT  reduce 22
+	RPAREN  reduce 22
+
+
+state 50
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr MODULO expr .  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+
+	TIMES  shift 21
+	POWER_OF  shift 24
+	APPLY  shift 27
+	PLUS  reduce 23
+	MINUS  reduce 23
+	DIVIDE  reduce 23
+	MODULO  reduce 23
+	OR  reduce 23
+	AND  reduce 23
+	EOF  reduce 23
+	LESS_THAN  reduce 23
+	LESS_THAN_EQUAL  reduce 23
+	GREATER_THAN  reduce 23
+	GREATER_THAN_EQUAL  reduce 23
+	EQUAL_TO  reduce 23
+	NOT_EQUAL_TO  reduce 23
+	SCOPE_BRACE_LEFT  reduce 23
+	SCOPE_BRACE_RIGHT  reduce 23
+	SQUARE_BRACE_RIGHT  reduce 23
+	RPAREN  reduce 23
+
+
+state 51
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr POWER_OF expr .  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+
+	POWER_OF  shift 24
+	PLUS  reduce 24
+	MINUS  reduce 24
+	TIMES  reduce 24
+	DIVIDE  reduce 24
+	MODULO  reduce 24
+	OR  reduce 24
+	AND  reduce 24
+	APPLY  reduce 24
+	EOF  reduce 24
+	LESS_THAN  reduce 24
+	LESS_THAN_EQUAL  reduce 24
+	GREATER_THAN  reduce 24
+	GREATER_THAN_EQUAL  reduce 24
+	EQUAL_TO  reduce 24
+	NOT_EQUAL_TO  reduce 24
+	SCOPE_BRACE_LEFT  reduce 24
+	SCOPE_BRACE_RIGHT  reduce 24
+	SQUARE_BRACE_RIGHT  reduce 24
+	RPAREN  reduce 24
+
+
+state 52
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr OR expr .  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+
+	PLUS  shift 19
+	MINUS  shift 20
+	TIMES  shift 21
+	DIVIDE  shift 22
+	MODULO  shift 23
+	POWER_OF  shift 24
+	AND  shift 26
+	APPLY  shift 27
+	LESS_THAN  shift 29
+	LESS_THAN_EQUAL  shift 30
+	GREATER_THAN  shift 31
+	GREATER_THAN_EQUAL  shift 32
+	EQUAL_TO  shift 33
+	NOT_EQUAL_TO  shift 34
+	OR  reduce 17
+	EOF  reduce 17
+	SCOPE_BRACE_LEFT  reduce 17
+	SCOPE_BRACE_RIGHT  reduce 17
+	SQUARE_BRACE_RIGHT  reduce 17
+	RPAREN  reduce 17
+
+
+state 53
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr AND expr .  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+
+	PLUS  shift 19
+	MINUS  shift 20
+	TIMES  shift 21
+	DIVIDE  shift 22
+	MODULO  shift 23
+	POWER_OF  shift 24
+	APPLY  shift 27
+	LESS_THAN  shift 29
+	LESS_THAN_EQUAL  shift 30
+	GREATER_THAN  shift 31
+	GREATER_THAN_EQUAL  shift 32
+	EQUAL_TO  shift 33
+	NOT_EQUAL_TO  shift 34
+	OR  reduce 16
+	AND  reduce 16
+	EOF  reduce 16
+	SCOPE_BRACE_LEFT  reduce 16
+	SCOPE_BRACE_RIGHT  reduce 16
+	SQUARE_BRACE_RIGHT  reduce 16
+	RPAREN  reduce 16
+
+
+state 54
+	expr : expr . APPLY expr  (10)
+	expr : expr APPLY expr .  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+
+	POWER_OF  shift 24
+	PLUS  reduce 10
+	MINUS  reduce 10
+	TIMES  reduce 10
+	DIVIDE  reduce 10
+	MODULO  reduce 10
+	OR  reduce 10
+	AND  reduce 10
+	APPLY  reduce 10
+	EOF  reduce 10
+	LESS_THAN  reduce 10
+	LESS_THAN_EQUAL  reduce 10
+	GREATER_THAN  reduce 10
+	GREATER_THAN_EQUAL  reduce 10
+	EQUAL_TO  reduce 10
+	NOT_EQUAL_TO  reduce 10
+	SCOPE_BRACE_LEFT  reduce 10
+	SCOPE_BRACE_RIGHT  reduce 10
+	SQUARE_BRACE_RIGHT  reduce 10
+	RPAREN  reduce 10
+
+
+state 55
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr LESS_THAN expr .  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+
+	PLUS  shift 19
+	MINUS  shift 20
+	TIMES  shift 21
+	DIVIDE  shift 22
+	MODULO  shift 23
+	POWER_OF  shift 24
+	APPLY  shift 27
+	OR  reduce 28
+	AND  reduce 28
+	EOF  reduce 28
+	LESS_THAN  reduce 28
+	LESS_THAN_EQUAL  reduce 28
+	GREATER_THAN  reduce 28
+	GREATER_THAN_EQUAL  reduce 28
+	EQUAL_TO  reduce 28
+	NOT_EQUAL_TO  reduce 28
+	SCOPE_BRACE_LEFT  reduce 28
+	SCOPE_BRACE_RIGHT  reduce 28
+	SQUARE_BRACE_RIGHT  reduce 28
+	RPAREN  reduce 28
+
+
+state 56
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr LESS_THAN_EQUAL expr .  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+
+	PLUS  shift 19
+	MINUS  shift 20
+	TIMES  shift 21
+	DIVIDE  shift 22
+	MODULO  shift 23
+	POWER_OF  shift 24
+	APPLY  shift 27
+	OR  reduce 26
+	AND  reduce 26
+	EOF  reduce 26
+	LESS_THAN  reduce 26
+	LESS_THAN_EQUAL  reduce 26
+	GREATER_THAN  reduce 26
+	GREATER_THAN_EQUAL  reduce 26
+	EQUAL_TO  reduce 26
+	NOT_EQUAL_TO  reduce 26
+	SCOPE_BRACE_LEFT  reduce 26
+	SCOPE_BRACE_RIGHT  reduce 26
+	SQUARE_BRACE_RIGHT  reduce 26
+	RPAREN  reduce 26
+
+
+state 57
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr GREATER_THAN expr .  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+
+	PLUS  shift 19
+	MINUS  shift 20
+	TIMES  shift 21
+	DIVIDE  shift 22
+	MODULO  shift 23
+	POWER_OF  shift 24
+	APPLY  shift 27
+	OR  reduce 29
+	AND  reduce 29
+	EOF  reduce 29
+	LESS_THAN  reduce 29
+	LESS_THAN_EQUAL  reduce 29
+	GREATER_THAN  reduce 29
+	GREATER_THAN_EQUAL  reduce 29
+	EQUAL_TO  reduce 29
+	NOT_EQUAL_TO  reduce 29
+	SCOPE_BRACE_LEFT  reduce 29
+	SCOPE_BRACE_RIGHT  reduce 29
+	SQUARE_BRACE_RIGHT  reduce 29
+	RPAREN  reduce 29
+
+
+state 58
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr GREATER_THAN_EQUAL expr .  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+
+	PLUS  shift 19
+	MINUS  shift 20
+	TIMES  shift 21
+	DIVIDE  shift 22
+	MODULO  shift 23
+	POWER_OF  shift 24
+	APPLY  shift 27
+	OR  reduce 27
+	AND  reduce 27
+	EOF  reduce 27
+	LESS_THAN  reduce 27
+	LESS_THAN_EQUAL  reduce 27
+	GREATER_THAN  reduce 27
+	GREATER_THAN_EQUAL  reduce 27
+	EQUAL_TO  reduce 27
+	NOT_EQUAL_TO  reduce 27
+	SCOPE_BRACE_LEFT  reduce 27
+	SCOPE_BRACE_RIGHT  reduce 27
+	SQUARE_BRACE_RIGHT  reduce 27
+	RPAREN  reduce 27
+
+
+state 59
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+	expr : expr EQUAL_TO expr .  (31)
+
+	PLUS  shift 19
+	MINUS  shift 20
+	TIMES  shift 21
+	DIVIDE  shift 22
+	MODULO  shift 23
+	POWER_OF  shift 24
+	APPLY  shift 27
+	LESS_THAN  shift 29
+	LESS_THAN_EQUAL  shift 30
+	GREATER_THAN  shift 31
+	GREATER_THAN_EQUAL  shift 32
+	OR  reduce 31
+	AND  reduce 31
+	EOF  reduce 31
+	EQUAL_TO  reduce 31
+	NOT_EQUAL_TO  reduce 31
+	SCOPE_BRACE_LEFT  reduce 31
+	SCOPE_BRACE_RIGHT  reduce 31
+	SQUARE_BRACE_RIGHT  reduce 31
+	RPAREN  reduce 31
+
+
+state 60
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr NOT_EQUAL_TO expr .  (30)
+	expr : expr . EQUAL_TO expr  (31)
+
+	PLUS  shift 19
+	MINUS  shift 20
+	TIMES  shift 21
+	DIVIDE  shift 22
+	MODULO  shift 23
+	POWER_OF  shift 24
+	APPLY  shift 27
+	LESS_THAN  shift 29
+	LESS_THAN_EQUAL  shift 30
+	GREATER_THAN  shift 31
+	GREATER_THAN_EQUAL  shift 32
+	OR  reduce 30
+	AND  reduce 30
+	EOF  reduce 30
+	EQUAL_TO  reduce 30
+	NOT_EQUAL_TO  reduce 30
+	SCOPE_BRACE_LEFT  reduce 30
+	SCOPE_BRACE_RIGHT  reduce 30
+	SQUARE_BRACE_RIGHT  reduce 30
+	RPAREN  reduce 30
+
+
+state 61
+	type_spec : FUNCTION_TYPE type_spec . type_spec  (7)
+
+	BOOLEAN_TYPE  shift 35
+	NUMBER_TYPE  shift 36
+	STRING_TYPE  shift 37
+	STREAM_TYPE  shift 38
+	LIST_TYPE  shift 39
+	FUNCTION_TYPE  shift 40
+	LPAREN  shift 41
+	.  error
+
+	type_spec  goto 66
+
+
+state 62
+	type_spec : LPAREN type_spec . RPAREN  (8)
+
+	RPAREN  shift 67
+	.  error
+
+
+state 63
+	expr : FUNCTION_TYPE LPAREN type_spec IDENT . RPAREN SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  (13)
+
+	RPAREN  shift 68
+	.  error
+
+
+state 64
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+	expr : IF expr SCOPE_BRACE_LEFT expr . SCOPE_BRACE_RIGHT ELSE SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  (32)
+
+	PLUS  shift 19
+	MINUS  shift 20
+	TIMES  shift 21
+	DIVIDE  shift 22
+	MODULO  shift 23
+	POWER_OF  shift 24
+	OR  shift 25
+	AND  shift 26
+	APPLY  shift 27
+	LESS_THAN  shift 29
+	LESS_THAN_EQUAL  shift 30
+	GREATER_THAN  shift 31
+	GREATER_THAN_EQUAL  shift 32
+	EQUAL_TO  shift 33
+	NOT_EQUAL_TO  shift 34
+	SCOPE_BRACE_RIGHT  shift 69
+	.  error
+
+
+state 65
+	expr : LET SQUARE_BRACE_LEFT IDENT EQUALS . expr SQUARE_BRACE_RIGHT SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  (9)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 70
+
+
+state 66
+	type_spec : FUNCTION_TYPE type_spec type_spec .  (7)
+
+	.  reduce 7
+
+
+state 67
+	type_spec : LPAREN type_spec RPAREN .  (8)
+
+	.  reduce 8
+
+
+state 68
+	expr : FUNCTION_TYPE LPAREN type_spec IDENT RPAREN . SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  (13)
+
+	SCOPE_BRACE_LEFT  shift 71
+	.  error
+
+
+state 69
+	expr : IF expr SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT . ELSE SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  (32)
+
+	ELSE  shift 72
+	.  error
+
+
+state 70
+	expr : LET SQUARE_BRACE_LEFT IDENT EQUALS expr . SQUARE_BRACE_RIGHT SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  (9)
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+
+	PLUS  shift 19
+	MINUS  shift 20
+	TIMES  shift 21
+	DIVIDE  shift 22
+	MODULO  shift 23
+	POWER_OF  shift 24
+	OR  shift 25
+	AND  shift 26
+	APPLY  shift 27
+	LESS_THAN  shift 29
+	LESS_THAN_EQUAL  shift 30
+	GREATER_THAN  shift 31
+	GREATER_THAN_EQUAL  shift 32
+	EQUAL_TO  shift 33
+	NOT_EQUAL_TO  shift 34
+	SQUARE_BRACE_RIGHT  shift 73
+	.  error
+
+
+state 71
+	expr : FUNCTION_TYPE LPAREN type_spec IDENT RPAREN SCOPE_BRACE_LEFT . expr SCOPE_BRACE_RIGHT  (13)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 74
+
+
+state 72
+	expr : IF expr SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT ELSE . SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  (32)
+
+	SCOPE_BRACE_LEFT  shift 75
+	.  error
+
+
+state 73
+	expr : LET SQUARE_BRACE_LEFT IDENT EQUALS expr SQUARE_BRACE_RIGHT . SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  (9)
+
+	SCOPE_BRACE_LEFT  shift 76
+	.  error
+
+
+state 74
+	expr : expr . APPLY expr  (10)
+	expr : FUNCTION_TYPE LPAREN type_spec IDENT RPAREN SCOPE_BRACE_LEFT expr . SCOPE_BRACE_RIGHT  (13)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+
+	PLUS  shift 19
+	MINUS  shift 20
+	TIMES  shift 21
+	DIVIDE  shift 22
+	MODULO  shift 23
+	POWER_OF  shift 24
+	OR  shift 25
+	AND  shift 26
+	APPLY  shift 27
+	LESS_THAN  shift 29
+	LESS_THAN_EQUAL  shift 30
+	GREATER_THAN  shift 31
+	GREATER_THAN_EQUAL  shift 32
+	EQUAL_TO  shift 33
+	NOT_EQUAL_TO  shift 34
+	SCOPE_BRACE_RIGHT  shift 77
+	.  error
+
+
+state 75
+	expr : IF expr SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT ELSE SCOPE_BRACE_LEFT . expr SCOPE_BRACE_RIGHT  (32)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 78
+
+
+state 76
+	expr : LET SQUARE_BRACE_LEFT IDENT EQUALS expr SQUARE_BRACE_RIGHT SCOPE_BRACE_LEFT . expr SCOPE_BRACE_RIGHT  (9)
+
+	NUMBER  shift 3
+	IDENT  shift 4
+	FUNCTION_TYPE  shift 5
+	NOT  shift 6
+	IF  shift 7
+	TRUE  shift 8
+	FALSE  shift 9
+	LET  shift 10
+	LPAREN  shift 11
+	.  error
+
+	expr  goto 79
+
+
+state 77
+	expr : FUNCTION_TYPE LPAREN type_spec IDENT RPAREN SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT .  (13)
+
+	.  reduce 13
+
+
+state 78
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+	expr : IF expr SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT ELSE SCOPE_BRACE_LEFT expr . SCOPE_BRACE_RIGHT  (32)
+
+	PLUS  shift 19
+	MINUS  shift 20
+	TIMES  shift 21
+	DIVIDE  shift 22
+	MODULO  shift 23
+	POWER_OF  shift 24
+	OR  shift 25
+	AND  shift 26
+	APPLY  shift 27
+	LESS_THAN  shift 29
+	LESS_THAN_EQUAL  shift 30
+	GREATER_THAN  shift 31
+	GREATER_THAN_EQUAL  shift 32
+	EQUAL_TO  shift 33
+	NOT_EQUAL_TO  shift 34
+	SCOPE_BRACE_RIGHT  shift 80
+	.  error
+
+
+state 79
+	expr : LET SQUARE_BRACE_LEFT IDENT EQUALS expr SQUARE_BRACE_RIGHT SCOPE_BRACE_LEFT expr . SCOPE_BRACE_RIGHT  (9)
+	expr : expr . APPLY expr  (10)
+	expr : expr . AND expr  (16)
+	expr : expr . OR expr  (17)
+	expr : expr . PLUS expr  (19)
+	expr : expr . MINUS expr  (20)
+	expr : expr . TIMES expr  (21)
+	expr : expr . DIVIDE expr  (22)
+	expr : expr . MODULO expr  (23)
+	expr : expr . POWER_OF expr  (24)
+	expr : expr . LESS_THAN_EQUAL expr  (26)
+	expr : expr . GREATER_THAN_EQUAL expr  (27)
+	expr : expr . LESS_THAN expr  (28)
+	expr : expr . GREATER_THAN expr  (29)
+	expr : expr . NOT_EQUAL_TO expr  (30)
+	expr : expr . EQUAL_TO expr  (31)
+
+	PLUS  shift 19
+	MINUS  shift 20
+	TIMES  shift 21
+	DIVIDE  shift 22
+	MODULO  shift 23
+	POWER_OF  shift 24
+	OR  shift 25
+	AND  shift 26
+	APPLY  shift 27
+	LESS_THAN  shift 29
+	LESS_THAN_EQUAL  shift 30
+	GREATER_THAN  shift 31
+	GREATER_THAN_EQUAL  shift 32
+	EQUAL_TO  shift 33
+	NOT_EQUAL_TO  shift 34
+	SCOPE_BRACE_RIGHT  shift 81
+	.  error
+
+
+state 80
+	expr : IF expr SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT ELSE SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT .  (32)
+
+	.  reduce 32
+
+
+state 81
+	expr : LET SQUARE_BRACE_LEFT IDENT EQUALS expr SQUARE_BRACE_RIGHT SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT .  (9)
+
+	.  reduce 9
+
+
+61 terminals, 5 nonterminals
+34 grammar rules, 82 states

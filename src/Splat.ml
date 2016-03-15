@@ -1,5 +1,5 @@
 exception LookupError ;;
-exception TypeError ;;
+exception TypeError of string;;
 exception UnboundVariableError;;
 exception Terminated ;;
 exception StuckTerm ;;
@@ -14,7 +14,7 @@ type splType =
     | SplatString
     | SplatList
     | SplatStream
-    | SplatFunction of splType * string * splTerm * splTerm
+    | SplatFunction of splType * splType
 
 (* Grammar of the language *)
 type splTerm =
@@ -58,10 +58,24 @@ type splTerm =
     | SplRange of splTerm * splTerm * splTerm
     | SplSplit of splTerm
 
+(*Function stuff*)
+    | SplApply of splTerm * splTerm
+    | SplAbs of splType * string * splTerm
+
 let rec isValue e = match e with
     | SplNumber(n) -> true
     | SplBoolean(b) -> true
+    | SplAbs(tT,x,e') -> true
     | _ -> false
+;;
+
+let rec type_to_string tT = match tT with
+  | SplatNumber -> "Number"
+  | SplatBoolean -> "Boolean"
+  | SplatList -> "List"
+  | SplatStream -> "Stream"
+  | SplatString -> "String"
+  | SplatFunction(tT1,tT2) -> "( "^type_to_string(tT1)^" -> "^type_to_string(tT2)^" )"
 ;;
 
 (* Type of Environments *)
@@ -95,71 +109,76 @@ let rec typeOf env e = match e with
     (*Boolean operators*)
     |SplAnd (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatBoolean, SplatBoolean -> SplatBoolean
-        | _ -> raise TypeError
+        | _ -> raise (TypeError "AND")
     )
     |SplOr (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatBoolean, SplatBoolean -> SplatBoolean
-        | _ -> raise TypeError
+        | _ -> raise (TypeError "OR")
     )
     |SplNot (e1) -> (match (typeOf env e1) with
         SplatBoolean -> SplatBoolean
-        | _ -> raise TypeError
+        | _ -> raise (TypeError "NOT")
     )
 
     (*Comparisons*)
     |SplLt (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatBoolean
-        | _ -> raise TypeError
+        | _ -> raise (TypeError "LESS_THAN")
     )
     |SplGt (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatBoolean
-        | _ -> raise TypeError
+        | _ -> raise (TypeError "GREATER_THAN")
     )
     |SplLe (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatBoolean
-        | _ -> raise TypeError
+        | _ -> raise (TypeError "LESS_THAN_EQUAL")
     )
     |SplGe (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatBoolean
-        | _ -> raise TypeError
+        | _ -> raise (TypeError "GREATER_THAN_EQUAL")
     )
     |SplNe (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatBoolean
-        | _ -> raise TypeError
+        | _ -> raise (TypeError "NOT_EQUALS")
     )
     |SplEq (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatBoolean
-        | _ -> raise TypeError
+        | _ -> raise (TypeError "EQUALS")
     )
 
     (*Arithmetic*)
     |SplPlus(e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatNumber
-        |_ -> raise TypeError
+        |_ -> raise (TypeError "PLUS")
     )
     |SplMinus(e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatNumber
-        |_ -> raise TypeError
+        |_ -> raise (TypeError "MINUS")
     )
     |SplTimes(e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatNumber
-        |_ -> raise TypeError
+        |_ -> raise (TypeError "TIMES")
     )
     |SplDivide(e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatNumber
-        |_ -> raise TypeError
+        |_ -> raise (TypeError "DIVIDE")
     )
     |SplModulo(e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatNumber
-        |_ -> raise TypeError
+        |_ -> raise (TypeError "MODULO")
     )
 
     (*Flow control*)
     |SplIfElse(e1, e2, e3) -> (
-        match (typeOf env e1) , (typeOf env e2), (typeOf env e3) with
-              SplatBoolean, SplatNumber, SplatNumber -> SplatNumber
-            | SplatBoolean, SplatBoolean, SplatBoolean -> SplatBoolean
-            | _ -> raise TypeError
+        let ty1 = typeOf env e1 in
+            match ty1 with
+                SplatBoolean -> ( let ty1 = typeOf env e2 in
+                    let ty2 = typeOf env e3 in
+                    (match (ty1=ty2) with
+                        true -> ty1
+                        | false -> raise (TypeError "IF_ELSE Internals not same types")
+                    ))
+                |_ -> raise (TypeError "IF_ELSE Condition not boolean")
     )
 
     |SplLet(e1, e2, e3) -> (
@@ -167,20 +186,33 @@ let rec typeOf env e = match e with
             (typeOf env' e3)
     )
 
-    |SplFunction(e1, e2, e3) -> (
-        let (env') = (addBinding env e1 (typeOf env e2)) in
-            (typeOf env' e3)
+    |SplApply(e1, e2) -> (
+        let ty1 = typeOf env e1 in
+        let ty2 = typeOf env e2 in
+        (
+            match ty1 with
+                SplatFunction(tT, tU) ->
+                (
+                    match tT = ty2 with
+                        true -> tT
+                        |false -> raise (TypeError "APPLY Function does not accept type")
+                )
+                | _ -> raise (TypeError (type_to_string(ty1)^" APPLY "^(type_to_string(ty2))))
+        )
     )
 
-    |SplVariable (x) ->  (try lookup env x with LookupError -> raise TypeError)
+    |SplAbs (tT, x, e) ->  SplatFunction(tT, typeOf (addBinding env x tT) e)
 
-let typeProg e = typeOf (Env []) e ;;
+    |SplVariable (x) ->  (try lookup env x with LookupError -> raise (TypeError x))
+
+let typeProg e = typeOf (Env []) e;;
 
 
 let rec eval env e = match e with
   | (SplVariable x) -> (try ((lookup env x) , env) with LookupError -> raise UnboundVariableError)
   | (SplNumber n) -> raise Terminated
   | (SplBoolean b) -> raise Terminated
+  | (SplAbs(tT,x,e')) -> raise Terminated
 
   (*Boolean operators*)
   | (SplAnd(SplBoolean(n),SplBoolean(m))) -> (SplBoolean( n && m ) , env)
@@ -254,9 +286,12 @@ let rec eval env e = match e with
   | (SplIfElse(e1, e2, e3))            -> let (e1',env') = (eval env e1) in (SplIfElse(e1', e2, e3) ,env')
 
   (*Assignment*)
-  | (SplLet(n, SplNumber(m), e3)) -> let (env') = (addBinding env n (SplNumber(m))) in (e3, env')
-  | (SplLet(n, SplBoolean(m), e3)) -> let (env') = (addBinding env n (SplBoolean(m))) in (e3, env')
+  | (SplLet(n, m, e3)) when (isValue(m) )-> (e3, addBinding env n m)
   | (SplLet(n, m, e3)) -> let (m', env') = (eval env m) in (SplLet(n, m', e3), env')
+
+  | (SplApply(SplAbs(tT,x,e), e2)) when (isValue(e2)) -> (e, addBinding env x e2)
+  | (SplApply(SplAbs(tT,x,e), e2))                    -> let (e2',env') = (eval env e2) in (SplApply( SplAbs(tT,x,e) , e2') , env')
+  | (SplApply(e1,e2))                                -> let (e1',env') = (eval env e1) in (SplApply(e1',e2), env')
 
   | _ -> raise Terminated ;;
 
@@ -266,16 +301,11 @@ let evalProg e = evalloop (Env []) e ;;
 
 let rename (s:string) = s^"'";;
 
-let rec type_to_string tT = match tT with
-  | SplatNumber -> "Number"
-  | SplatBoolean -> "Boolean"
-  | SplatList -> "List"
-  | SplatStream -> "Stream"
-  | SplatString -> "String"
-  | SplatFunction(tT1,tT2) -> "( "^type_to_string(tT1)^" -> "^type_to_string(tT2)^" )"
-;;
-
 let print_res res = match res with
     | (SplNumber i) -> print_float i ; print_string " : Number"
     | (SplBoolean b) -> print_string (if b then "true" else "false") ; print_string " : Bool"
+    | (SplAbs(tT,x,e)) -> print_string("Function : "^type_to_string( typeProg (res) ))
+    (*Comment up to raise error to stop debugging*)
+    (* | (SplApply(e1, e2)) -> print_string "apply"
+    | (SplLet(e1, e2, e3)) -> print_string "let" *)
     | _ -> raise NonBaseTypeResult

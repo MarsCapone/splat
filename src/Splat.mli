@@ -1,3 +1,4 @@
+(* Types of the language *)
 type splType =
     SplatNumber
     | SplatBoolean
@@ -47,6 +48,10 @@ type splTerm =
     | SplShow of splTerm
     | SplRange of splTerm * splTerm * splTerm
     | SplSplit of splTerm
+
+(*Function stuff*)
+    | SplApply of splTerm * splTerm
+    | SplAbs of splType * string * splTerm
 
 val typeProg : splTerm -> splType
 val evalProg :  splTerm -> splTerm
