@@ -15,6 +15,7 @@ type splType =
     | SplatBoolean
     | SplatString
     | SplatList
+    | SplatVoid
     | SplatFunction of splType * splType
 
 (* Grammar of the language *)
@@ -23,6 +24,7 @@ type splTerm =
     | SplBoolean of bool
     | SplString of string
     | SplList of splTerm list
+    | SplVoid of unit
     | SplVariable of string
 (* number operators *)
     | SplPlus of splTerm * splTerm
@@ -73,6 +75,7 @@ let rec isValue e = match e with
     | SplNumber(n) -> true
     | SplBoolean(b) -> true
     | SplList(l) -> true
+    | SplVoid(v) -> true
     | SplAbs(tT,x,e') -> true
     | _ -> false
 ;;
@@ -84,8 +87,13 @@ let rec type_to_string tT = match tT with
   | SplatBoolean -> "Boolean"
   | SplatList -> "List"
   | SplatString -> "String"
+  | SplatVoid -> "Void"
   | SplatFunction(tT1,tT2) -> "( "^type_to_string(tT1)^" -> "^type_to_string(tT2)^" )"
 ;;
+
+let rec print_list = function
+    [] -> print_string ""
+    | SplNumber(e) :: l -> print_float e; print_string " "; print_list l
 
 (* Type of Environments *)
 
@@ -227,6 +235,14 @@ let rec typeOf env e = match e with
 
     |SplAbs (tT, x, e) ->  SplatFunction(tT, typeOf (addBinding env x tT) e)
 
+    | SplShow (e1) -> (match (typeOf env e1) with
+        SplatNumber -> SplatVoid
+        | SplatBoolean -> SplatVoid
+        | SplatString -> SplatVoid
+        | SplatList -> SplatVoid
+        | _ -> raise (TypeError "SHOW")
+    )
+
     |SplVariable (x) ->  (try lookup env x with LookupError -> raise (TypeError x))
 
 let typeProg e = typeOf (Env []) e ;;
@@ -336,6 +352,12 @@ let rec eval env e = match e with
   | (SplApply(SplAbs(tT,x,e), e2))                    -> let (e2',env') = (eval env e2) in (SplApply( SplAbs(tT,x,e) , e2') , env')
   | (SplApply(e1,e2))                                -> let (e1',env') = (eval env e1) in (SplApply(e1',e2), env')
 
+  (*Predefined functions*)
+  | (SplShow(SplNumber n)) -> (SplVoid(print_float n; print_string "\n"), env)
+  | (SplShow(SplBoolean n)) -> (SplVoid(print_string (if n then "true" else "false")), env)
+  | (SplShow(SplList(n))) -> (SplVoid(print_list n), env)
+  | (SplShow(e1)) -> let (e1', env') = (eval env e1) in (SplShow(e1'), env')
+
   | _ -> raise Terminated ;;
 
 
@@ -345,16 +367,15 @@ let evalProg e = evalloop (Env []) e ;;
 let rename (s:string) = s^"'";;
 
 
-let rec print_list = function
-    [] -> ()
-    | e :: l -> Some e; print_string " "; print_list l
+
 
 
 let print_res res = match res with
     | (SplNumber i) -> print_float i ; print_string " : Number"
     | (SplBoolean b) -> print_string (if b then "true" else "false") ; print_string " : Bool"
     | (SplAbs(tT,x,e)) -> print_string("Function : "^type_to_string( typeProg (res) ))
-    | (SplList l) -> print_string "["; print_list l; print_string "]"
+    | (SplList l) -> print_string "["; print_list l; print_string "] : List"
+    | (SplVoid v) -> print_string " : Void"
     (*Comment up to raise error to stop debugging*)
     (* | (SplApply(e1, e2)) -> print_string "apply"
     | (SplLet(e1, e2, e3)) -> print_string "let" *)

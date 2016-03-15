@@ -5,7 +5,7 @@
 %token <float> NUMBER
 %token <string> IDENT
 %token <string> STRING
-%token BOOLEAN_TYPE NUMBER_TYPE STRING_TYPE STREAM_TYPE LIST_TYPE FUNCTION_TYPE
+%token BOOLEAN_TYPE NUMBER_TYPE STRING_TYPE STREAM_TYPE LIST_TYPE VOID_TYPE FUNCTION_TYPE 
 /*Operators*/
 %token PLUS MINUS TIMES DIVIDE MODULO NOT POWER_OF OR AND
 %token FOR FOREVER IN
@@ -49,6 +49,7 @@
 %left TIMES
 %left APPLY
 %right POWER_OF NOT
+%right CONS
 %nonassoc IF THEN ELSE WHILE FOR FOREVER IN
 
 %start parser_main             /* the entry point */
@@ -63,6 +64,7 @@ type_spec:
     | BOOLEAN_TYPE      { SplatBoolean }
     | STRING_TYPE       { SplatString }
     | LIST_TYPE         { SplatList }
+    | VOID_TYPE         { SplatVoid }
     | FUNCTION_TYPE type_spec type_spec { SplatFunction ($2, $3) }
     | LPAREN type_spec RPAREN { $2 }
 ;
@@ -108,4 +110,7 @@ expr:
     | EMPTY_LIST                    { SplList [] }
     | HEAD expr                     { SplHead $2 }
     | TAIL expr                     { SplTail $2 }
+
+    /*Predefined functions*/
+    | SHOW expr                     { SplShow $2 }
 ;

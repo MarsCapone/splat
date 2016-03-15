@@ -4,6 +4,7 @@ type splType =
     | SplatBoolean
     | SplatString
     | SplatList
+    | SplatVoid
     | SplatFunction of splType * splType
 
 (* Grammar of the language *)
@@ -12,6 +13,7 @@ type splTerm =
     | SplBoolean of bool
     | SplString of string
     | SplList of splTerm list
+    | SplVoid of unit
     | SplVariable of string
 (* number operators *)
     | SplPlus of splTerm * splTerm
@@ -28,7 +30,7 @@ type splTerm =
     | SplCons of splTerm * splTerm
     | SplHead of splTerm
     | SplTail of splTerm
-    | SplEmptyList of splTerm 
+    | SplEmptyList of splTerm
 (* flow *)
     | SplFor of splTerm * splTerm * splTerm
     | SplForever of splTerm

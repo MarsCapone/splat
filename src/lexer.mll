@@ -14,6 +14,7 @@ rule lexer_main = parse
     | "string"    { STRING_TYPE }
     | "stream"    { STREAM_TYPE }
     | "list"      { LIST_TYPE }
+    | "void"      { VOID_TYPE }
     | "function"  { FUNCTION_TYPE }
 
 (*Flow*)
