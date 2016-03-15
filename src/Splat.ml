@@ -227,7 +227,7 @@ let rec typeOf env e = match e with
                 (
                     match tT = ty2 with
                         true -> ty1
-                        |false -> raise (TypeError "APPLY Function does not accept type")
+                        | false -> raise (TypeError ("Function expected type "^type_to_string(tT)^" but received type "^type_to_string(ty2)))
                 )
                 | _ -> raise (TypeError (type_to_string(ty1)^" APPLY "^(type_to_string(ty2))))
         )
