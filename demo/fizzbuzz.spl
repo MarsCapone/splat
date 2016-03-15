@@ -16,12 +16,23 @@ function stream fizzbuzz (stream splat) = {
     }
 }
 
+function stream fizzbuzz (stream splat) {
+    let [h = head splat] {
+        if h == eof
+            { [] }
+            { if h % 3 == 0
+                { 'fizzbuzz' :: fizzbuzz tail splat }
+                { [] }
+        }
+    }
+}
+
 function stream fizzbuzz_switch (stream splat) = {
     for (number s) in splat {
         switch s {
             s % 3 == 0 and s % 5 == 0 {
                 show 'fizzbuzz'¬
-            } 
+            }
             s % 3 == 0 {
                 show 'fizz'¬
             }
@@ -37,7 +48,7 @@ function string one_fizzbuzz (number s) = {
     switch s {
         s%3==0 and s%5==0 {
             return 'fizzbuzz'¬
-        } 
+        }
         s%3==0 {
             return 'fizz'¬
         }

@@ -14,7 +14,7 @@ type splType =
     | SplatString
     | SplatList
     | SplatStream
-    | SplatFunction of splType * splType
+    | SplatFunction of splType * string * splTerm * splTerm
 
 (* Grammar of the language *)
 type splTerm =
@@ -163,6 +163,11 @@ let rec typeOf env e = match e with
     )
 
     |SplLet(e1, e2, e3) -> (
+        let (env') = (addBinding env e1 (typeOf env e2)) in
+            (typeOf env' e3)
+    )
+
+    |SplFunction(e1, e2, e3) -> (
         let (env') = (addBinding env e1 (typeOf env e2)) in
             (typeOf env' e3)
     )

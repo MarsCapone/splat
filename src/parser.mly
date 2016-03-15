@@ -56,7 +56,7 @@ type_spec:
     | STRING_TYPE       { SplatString }
     | LIST_TYPE         { SplatList }
     | STREAM_TYPE       { SplatStream }
-    | FUNCTION_TYPE type_spec IDENT type_spec    { SplatFunction ($2, $4) }
+    | FUNCTION_TYPE type_spec IDENT LPAREN type_spec IDENT RPAREN expr { SplatFunction ($2, $3, $5, $6, $8) }
     | LPAREN type_spec RPAREN { $2 }
 ;
 
