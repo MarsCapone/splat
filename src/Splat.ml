@@ -361,8 +361,8 @@ let rec eval env e = match e with
 
   (*Predefined functions*)
   | (SplShow(SplNumber n)) -> (SplVoid(print_float n; print_string "\n"), env)
-  | (SplShow(SplBoolean n)) -> (SplVoid(print_string (if n then "true" else "false")), env)
-  | (SplShow(SplList(n))) -> (SplVoid(print_list n), env)
+  | (SplShow(SplBoolean n)) -> (SplVoid(print_string (if n then "true" else "false"); print_string "\n"), env)
+  | (SplShow(SplList(n))) -> (SplVoid(print_list n; print_string "\n"), env)
   | (SplShow(e1)) -> let (e1', env') = (eval env e1) in (SplShow(e1'), env')
 
   | _ -> raise Terminated ;;
