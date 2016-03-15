@@ -4,6 +4,8 @@ exception UnboundVariableError;;
 exception Terminated ;;
 exception StuckTerm ;;
 exception NonBaseTypeResult;;
+exception OutOfBounds ;;
+exception SyntaxError ;;
 
 open Printf;;
 
@@ -13,7 +15,6 @@ type splType =
     | SplatBoolean
     | SplatString
     | SplatList
-    | SplatStream
     | SplatFunction of splType * splType
 
 (* Grammar of the language *)
@@ -21,6 +22,7 @@ type splTerm =
     | SplNumber of float
     | SplBoolean of bool
     | SplString of string
+    | SplList of splTerm list
     | SplVariable of string
 (* number operators *)
     | SplPlus of splTerm * splTerm
@@ -33,6 +35,11 @@ type splTerm =
     | SplNot of splTerm
     | SplAnd of splTerm * splTerm
     | SplOr of splTerm * splTerm
+(* stream / list operators *)
+    | SplCons of splTerm * splTerm
+    | SplHead of splTerm
+    | SplTail of splTerm
+    | SplEmptyList of splTerm
 (* flow *)
     | SplFor of splTerm * splTerm * splTerm
     | SplForever of splTerm
@@ -61,6 +68,7 @@ type splTerm =
 let rec isValue e = match e with
     | SplNumber(n) -> true
     | SplBoolean(b) -> true
+    | SplList(l) -> true
     | _ -> false
 ;;
 
@@ -91,6 +99,7 @@ let rec typeOf env e = match e with
     SplNumber (n) -> SplatNumber
     |SplBoolean (b) -> SplatBoolean
     |SplString (s) -> SplatString
+    |SplList (l) -> SplatList
 
     (*Boolean operators*)
     |SplAnd (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
@@ -154,6 +163,20 @@ let rec typeOf env e = match e with
         |_ -> raise TypeError
     )
 
+    | SplCons(e1, e2) -> (
+        match (typeOf env e1), (typeOf env e2) with
+            _, SplatList -> SplatList
+            | _ -> raise TypeError
+    )
+    | SplHead (e1) -> (
+        typeOf env e1
+    )
+    | SplTail (e1) -> (
+        match (typeOf env e1) with
+            SplatList -> SplatList
+            | _ -> raise TypeError
+    )
+
     (*Flow control*)
     |SplIfElse(e1, e2, e3) -> (
         match (typeOf env e1) , (typeOf env e2), (typeOf env e3) with
@@ -169,6 +192,7 @@ let rec typeOf env e = match e with
 
     |SplVariable (x) ->  (try lookup env x with LookupError -> raise TypeError)
 
+
 let typeProg e = typeOf (Env []) e ;;
 
 
@@ -176,6 +200,7 @@ let rec eval env e = match e with
   | (SplVariable x) -> (try ((lookup env x) , env) with LookupError -> raise UnboundVariableError)
   | (SplNumber n) -> raise Terminated
   | (SplBoolean b) -> raise Terminated
+  | (SplList l) -> raise Terminated
 
   (*Boolean operators*)
   | (SplAnd(SplBoolean(n),SplBoolean(m))) -> (SplBoolean( n && m ) , env)
@@ -248,6 +273,24 @@ let rec eval env e = match e with
   | (SplIfElse(SplBoolean(n), e2, e3))      -> let (e2',env') = (eval env e2) in (SplIfElse(SplBoolean(n),e2',e3),env')
   | (SplIfElse(e1, e2, e3))            -> let (e1',env') = (eval env e1) in (SplIfElse(e1', e2, e3) ,env')
 
+  | (SplCons(SplNumber(n), SplList(m))) -> (SplList( SplNumber(n) :: m ), env)
+  | (SplCons(SplNumber(n), e2)) -> let (e2', env') = (eval env e2) in (SplCons(SplNumber(n), e2'), env')
+
+  | (SplHead(SplList(n))) -> (match n with
+        SplNumber(h) :: _ -> (SplNumber(h), env)
+        | SplBoolean (h) :: _ -> (SplBoolean(h), env)
+        | SplString (h) :: _ -> (SplString(h), env)
+        | [] -> raise OutOfBounds
+        | _ -> raise SyntaxError
+  )
+  | (SplHead(e1)) -> let (e1', env') = (eval env e1) in (SplHead (e1'), env')
+
+  | (SplTail(SplList(n))) -> (match n with
+        _ :: t -> (SplList(t), env)
+        | [] -> raise OutOfBounds
+    )
+  | (SplTail(e1)) -> let (e1', env') = (eval env e1) in (SplTail(e1'), env')
+
   (*Assignment*)
   | (SplLet(n, SplNumber(m), e3)) -> let (env') = (addBinding env n (SplNumber(m))) in (e3, env')
   | (SplLet(n, SplBoolean(m), e3)) -> let (env') = (addBinding env n (SplBoolean(m))) in (e3, env')
@@ -265,12 +308,16 @@ let rec type_to_string tT = match tT with
   | SplatNumber -> "Number"
   | SplatBoolean -> "Boolean"
   | SplatList -> "List"
-  | SplatStream -> "Stream"
   | SplatString -> "String"
   | SplatFunction(tT1,tT2) -> "( "^type_to_string(tT1)^" -> "^type_to_string(tT2)^" )"
 ;;
 
+let rec print_list = function
+    [] -> ()
+    | e :: l -> Some e; print_string " "; print_list l
+
 let print_res res = match res with
     | (SplNumber i) -> print_float i ; print_string " : Number"
     | (SplBoolean b) -> print_string (if b then "true" else "false") ; print_string " : Bool"
+    | (SplList l) -> print_string "["; print_list l; print_string "]"
     | _ -> raise NonBaseTypeResult
