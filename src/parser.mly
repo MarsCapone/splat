@@ -12,9 +12,10 @@
 %token IF THEN ELSE
 %token WHILE
 %token SWITCH
-%token BREAK CONTINUE RETURN
 %token CONS
 %token HEAD TAIL EMPTY_LIST
+
+%token BREAK CONTINUE RETURN APPLY
 /*Predefined*/
 %token TRUE FALSE
 %token STDIN
@@ -46,6 +47,7 @@
 %left PLUS MINUS
 %left DIVIDE MODULO
 %left TIMES
+%left APPLY
 %right POWER_OF NOT
 %nonassoc IF THEN ELSE WHILE FOR FOREVER IN
 
@@ -61,15 +63,19 @@ type_spec:
     | BOOLEAN_TYPE      { SplatBoolean }
     | STRING_TYPE       { SplatString }
     | LIST_TYPE         { SplatList }
-    | FUNCTION_TYPE type_spec IDENT type_spec    { SplatFunction ($2, $4) }
+    | STREAM_TYPE       { SplatStream }
+    | FUNCTION_TYPE type_spec type_spec { SplatFunction ($2, $3) }
     | LPAREN type_spec RPAREN { $2 }
 ;
 
 expr:
     | LET SQUARE_BRACE_LEFT IDENT EQUALS expr SQUARE_BRACE_RIGHT SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT { SplLet ($3, $5, $8) }
+    | expr APPLY expr               { SplApply ($1, $3) }
 
     | NUMBER                        { SplNumber $1 }
     | IDENT                         { SplVariable $1 }
+
+    | FUNCTION_TYPE LPAREN type_spec IDENT RPAREN SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT { SplAbs ($3, $4, $7) }
 
     /*Booleans*/
     | FALSE                         { SplBoolean false }

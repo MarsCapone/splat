@@ -29,6 +29,7 @@ rule lexer_main = parse
     | "continue" { CONTINUE }
     | "return" { RETURN }
     | "let"    { LET }
+    | '$'      { APPLY }
 
 (*Predefined*)
     | "true"   { TRUE }
