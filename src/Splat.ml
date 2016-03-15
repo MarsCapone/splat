@@ -94,6 +94,9 @@ let rec type_to_string tT = match tT with
 let rec print_list = function
     [] -> print_string ""
     | SplNumber(e) :: l -> print_float e; print_string " "; print_list l
+    | SplBoolean(b) :: l -> print_string (if b then "true " else "false "); print_list l
+    | SplList(a) :: l -> print_string "["; print_list a; print_string "]"; print_list l
+    | SplString(s) :: l -> print_string s 
 
 (* Type of Environments *)
 
