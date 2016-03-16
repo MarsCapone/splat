@@ -432,9 +432,12 @@ let rec eval env e = match e with
       (print_string n; print_string "\n") in (SplString n)), env)
   | (SplShowLn(e1)) -> let (e1', env') = (eval env e1) in (SplShowLn(e1'), env')
 
-  | (SplJustDo(n, e1)) ->
-          let p, _ = (eval env n) in
-            let (e1', env') = (eval env e1) in
+
+  | (SplJustDo(n, m)) ->
+          let p, _ = (eval env n) in (m, env)
+  | (SplJustDo(n, e1)) -> 
+          let p, _ = (eval env n) in 
+            let (e1', env') = (eval env e1) in 
                 (e1', env')
 
   | (SplSplit(SplString(s)))    -> ((split s), env)
