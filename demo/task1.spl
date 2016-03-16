@@ -3,7 +3,7 @@ let [zero = show 0] {
         if splat == [] {
             []
         } else {
-            let [s = show (head splat)] {
+            let [s = showln (head splat)] {
                 t1 #(tail splat)
             }
         }

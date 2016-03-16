@@ -1,3 +1,9 @@
-function list t1 (list l) {
-    5 :: l
-} #stdin
+function list f1 (number i1) {
+    function list f2 (number i2) {
+        if (i1 > 100) {
+            []
+        } else {
+            (i1+i2) :: (f1 #i2 #(i1 + i2))
+        }
+    }
+}#0 #1

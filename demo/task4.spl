@@ -1,10 +1,13 @@
-function steam task4 (stream splat) = {
-    (number a = 0) {
-        for (number s) in splat {
-            show (s + a)¬
-            a += s¬
+function number t4 (list splat) {
+    function number i (number acc) {
+        if splat == [] {
+            0
+        } else {
+            let [v = (acc + (as_num (head splat)))] {
+                let [s = showln v] {
+                    t4 #(tail splat) #v
+                }
+            }
         }
     }
-}
-
-task4 stdin¬
+} #stdin #0

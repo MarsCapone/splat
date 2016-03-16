@@ -1,9 +1,13 @@
-function number t3 (number splat) {
-    if splat==10 {
-        0
+function list t3 (list splat) {
+    if splat == [] {
+        []
     } else {
-        let [s = showln splat] {
-            t3 #(t3 #splat+1)
+        let [v1 = (as_num (head (split (head splat))))] {
+            let [v2 = (as_num (head (tail (split (head splat)))))] {
+                let [s = (showln v1 + (v2*3)) ] {
+                    v1 + (v2*3) :: (t3 #(tail splat))
+                }
+            }
         }
     }
-} #1
+} #stdin

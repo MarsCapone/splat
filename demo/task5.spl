@@ -1,26 +1,17 @@
-function stream task5 (stream splat) = {
-    
-    (number prev1 = 0, number prev2 = 0) {
-        for (number s) in splat {
-            show (prev1 + prev2 + s)¬
-            (number tmp = prev2) {
-                prev2 = prev1¬
-                prev1 = (prev1 + tmp + s)¬
+function number t5 (number first) {
+    function number i1 (number second) {
+        function number i2 (list splat) {
+            if splat == [] {
+                0
+            } else {
+                let [h = (as_num (head splat))] {
+                    let [next = (h + first + second)] {
+                        let [s = showln next] {
+                            t5 #next #first #(tail splat)
+                        }
+                    }
+                }
             }
         }
     }
-}
-
-function number fibonacci (number n) = {
-    if n == 0 {
-        return 0¬
-    } else {
-        if n == 1 {
-            return 1¬
-        } else {
-            return ((fibonacci (n-1)) + (fibonacci (n-2)))¬
-        }
-    }
-}
-
-task5 stdin¬
+} #0 #0 #stdin

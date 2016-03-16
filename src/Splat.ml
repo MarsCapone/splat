@@ -2,7 +2,6 @@ exception LookupError ;;
 exception TypeError of string;;
 exception UnboundVariableError of string;;
 exception Terminated ;;
-exception StuckTerm ;;
 exception NonBaseTypeResult;;
 exception OutOfBounds ;;
 exception SyntaxError ;;
@@ -72,6 +71,8 @@ type splTerm =
     | SplApply of splTerm * splTerm
     | SplAbs of splType * string * splType * string * splTerm
 
+exception StuckTerm of splTerm;;
+
 let rec isValue e = match e with
     | SplNumber(n) -> true
     | SplBoolean(b) -> true
@@ -131,6 +132,7 @@ let rec lookup env str = match env with
 let addBinding env str thing = match env with
       Env(gs) -> Env ( (str, thing) :: gs ) ;;
 
+let typechecking_on = false ;;
 
 (* The type checking function itself *)
 let rec typeOf env e = match e with
@@ -253,21 +255,25 @@ let rec typeOf env e = match e with
             match ty1 with
                 SplatFunction(tT, tU) ->
                 (
+                    (print_string ("Apply "^type_to_string(ty2)^" to function accepting "^type_to_string(tT)^"\n"));
                     match tT = ty2 with
-                        true -> ty1
+                        true -> tU
                         | false -> raise (TypeError ("Function expected type "^type_to_string(tT)^" but received type "^type_to_string(ty2)))
                 )
-                | _ -> raise (TypeError (type_to_string(ty1)^" APPLY "^(type_to_string(ty2))))
+                | _ -> if typechecking_on then
+                            raise (TypeError (type_to_string(ty1)^" APPLY "^(type_to_string(ty2))))
+                        else
+                            ty1
         )
     )
 
     |SplAbs (rT, n, tT, x, e) ->  (
-        let retType = rT in
-        let ty1 = typeOf (addBinding (addBinding env n (SplatFunction(tT, retType))) x tT) e in
+        let env' = (addBinding (addBinding env n (SplatFunction(tT, rT))) x tT ) in
+        let ty1 = typeOf env' e in
         (
             match ty1 with
-                SplatFunction(p, r) -> ty1
-                | _ -> SplatFunction(tT, ty1)
+                SplatFunction(p, r) -> SplatFunction(tT, SplatFunction(p, r))
+                | _ -> SplatFunction(tT, rT)
         )
     )
 
@@ -435,9 +441,9 @@ let rec eval env e = match e with
 
   | (SplJustDo(n, m)) ->
           let p, _ = (eval env n) in (m, env)
-  | (SplJustDo(n, e1)) -> 
-          let p, _ = (eval env n) in 
-            let (e1', env') = (eval env e1) in 
+  | (SplJustDo(n, e1)) ->
+          let p, _ = (eval env n) in
+            let (e1', env') = (eval env e1) in
                 (e1', env')
 
   | (SplSplit(SplString(s)))    -> ((split s), env)
@@ -449,7 +455,7 @@ let rec eval env e = match e with
   | _ -> raise Terminated ;;
 
 
-let rec evalloop env e = try (let (e',env') = (eval env e) in (evalloop env' e')) with Terminated -> if (isValue e) then e else raise StuckTerm;;
+let rec evalloop env e = try (let (e',env') = (eval env e) in (evalloop env' e')) with Terminated -> if (isValue e) then e else raise (StuckTerm e);;
 let evalProg e = evalloop (Env []) e ;;
 
 let rename (s:string) = s^"'";;
