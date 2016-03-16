@@ -255,7 +255,8 @@ let rec typeOf env e = match e with
             match ty1 with
                 SplatFunction(tT, tU) ->
                 (
-                    (print_string ("Apply "^type_to_string(ty2)^" to function accepting "^type_to_string(tT)^"\n"));
+                    (*(print_string ("Apply "^type_to_string(ty2)^" to function
+                        * accepting "^type_to_string(tT)^"\n"));*)
                     match tT = ty2 with
                         true -> tU
                         | false -> raise (TypeError ("Function expected type "^type_to_string(tT)^" but received type "^type_to_string(ty2)))
