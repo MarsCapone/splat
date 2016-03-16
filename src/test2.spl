@@ -1,0 +1,7 @@
+function number f (number i) {
+    if i == 10 {
+        55
+    } else {
+        f #10
+    }
+} #1

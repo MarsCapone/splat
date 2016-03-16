@@ -1,6 +1,6 @@
 exception LookupError ;;
 exception TypeError of string;;
-exception UnboundVariableError;;
+exception UnboundVariableError of string;;
 exception Terminated ;;
 exception StuckTerm ;;
 exception NonBaseTypeResult;;
@@ -67,14 +67,14 @@ type splTerm =
 
 (*Function stuff*)
     | SplApply of splTerm * splTerm
-    | SplAbs of splType * string * splTerm
+    | SplAbs of splType * string * splType * string * splTerm
 
 let rec isValue e = match e with
     | SplNumber(n) -> true
     | SplBoolean(b) -> true
     | SplString(s) -> true
     | SplList(l) -> true
-    | SplAbs(tT,x,e') -> true
+    | SplAbs(rT, n, tT,x,e') -> true
     | _ -> false
 ;;
 
@@ -94,7 +94,7 @@ let rec print_list = function
     | SplBoolean(b) :: l -> print_string (if b then "true; " else "false; "); print_list l
     | SplList(a) :: l -> print_string "["; print_list a; print_string "]"; print_list l
     | SplString(s) :: l -> print_string s; print_string "; "; print_list l
-    | SplAbs(tT, x, e) :: l -> print_string "function:"; 
+    | SplAbs(rT, n, tT, x, e) :: l -> print_string "function:";
         print_string (type_to_string tT); print_list l
     | _ -> print_string "null"
 
@@ -207,11 +207,20 @@ let rec typeOf env e = match e with
     |SplIfElse(e1, e2, e3) -> (
         let ty1 = typeOf env e1 in
             match ty1 with
-                SplatBoolean -> ( let ty1 = typeOf env e2 in
+                SplatBoolean -> (
+                    let ty1 = typeOf env e2 in
                     let ty2 = typeOf env e3 in
                     (match (ty1=ty2) with
                         true -> ty1
-                        | false -> raise (TypeError "IF_ELSE Internals not same types")
+                        | false -> (
+                            match ty1 with
+                                SplatFunction(tT, tU) -> ty2
+                                | _ -> (
+                                    match ty2 with
+                                        SplatFunction(tT, tU) -> ty1
+                                        | _ -> raise (TypeError "IF_ELSE Internals not same types")
+                                    )
+                            )
                     ))
                 |_ -> raise (TypeError "IF_ELSE Condition not boolean")
     )
@@ -236,8 +245,9 @@ let rec typeOf env e = match e with
         )
     )
 
-    |SplAbs (tT, x, e) ->  (
-        let ty1 = typeOf (addBinding env x tT) e in
+    |SplAbs (rT, n, tT, x, e) ->  (
+        let retType = rT in
+        let ty1 = typeOf (addBinding (addBinding env n (SplatFunction(tT, rT))) x tT) e in
         (
             match ty1 with
                 SplatFunction(p, r) -> ty1
@@ -259,11 +269,11 @@ let typeProg e = typeOf (Env []) e ;;
 
 
 let rec eval env e = match e with
-  | (SplVariable x) -> (try ((lookup env x) , env) with LookupError -> raise UnboundVariableError)
+  | (SplVariable x) -> (try ((lookup env x) , env) with LookupError -> raise (UnboundVariableError x))
   | (SplNumber n) -> raise Terminated
   | (SplBoolean b) -> raise Terminated
   | (SplList l) -> raise Terminated
-  | (SplAbs(tT,x,e')) -> raise Terminated
+  | (SplAbs(rT, n, tT,x,e')) -> raise Terminated
 
   (*Boolean operators*)
   | (SplAnd(SplBoolean(n),SplBoolean(m))) -> (SplBoolean( n && m ) , env)
@@ -329,11 +339,7 @@ let rec eval env e = match e with
   | (SplPower(e1, e2))            -> let (e1',env') = (eval env e1) in (SplPower(e1', e2) ,env')
 
   (*Flow*)
-  | (SplIfElse(SplBoolean(n), SplNumber(m), SplNumber(o))) -> (SplNumber( if n then m else o), env)
-  | (SplIfElse(SplBoolean(n), SplBoolean(m), SplBoolean(o))) -> (SplBoolean( if n then m else o), env)
-  | (SplIfElse(SplBoolean(n), SplNumber(m), e3))      -> let (e3',env') = (eval env e3) in (SplIfElse(SplBoolean(n),SplNumber(m),e3),env')
-  | (SplIfElse(SplBoolean(n), SplBoolean(m), e3))      -> let (e3',env') = (eval env e3) in (SplIfElse(SplBoolean(n),SplBoolean(m),e3),env')
-  | (SplIfElse(SplBoolean(n), e2, e3))      -> let (e2',env') = (eval env e2) in (SplIfElse(SplBoolean(n),e2',e3),env')
+  | (SplIfElse(SplBoolean(n), e2, e3)) -> ((if n then e2 else e3), env)
   | (SplIfElse(e1, e2, e3))            -> let (e1',env') = (eval env e1) in (SplIfElse(e1', e2, e3) ,env')
 
   | (SplCons(SplNumber(n), SplList(m))) -> (SplList( SplNumber(n) :: m ), env)
@@ -357,17 +363,17 @@ let rec eval env e = match e with
   | (SplLet(n, m, e3)) when (isValue(m) )-> (e3, addBinding env n m)
   | (SplLet(n, m, e3)) -> let (m', env') = (eval env m) in (SplLet(n, m', e3), env')
 
-  | (SplApply(SplAbs(tT,x,e), e2)) when (isValue(e2)) -> (e, addBinding env x e2)
-  | (SplApply(SplAbs(tT,x,e), e2))                    -> let (e2',env') = (eval env e2) in (SplApply( SplAbs(tT,x,e) , e2') , env')
+  | (SplApply(SplAbs(rT,n,tT,x,e), e2)) when (isValue(e2)) -> (e, addBinding (addBinding env n (SplAbs(rT,n,tT,x,e))) x e2)
+  | (SplApply(SplAbs(rT,n,tT,x,e), e2))                    -> let (e2',env') = (eval env e2) in (SplApply( SplAbs(rT,n,tT,x,e) , e2') , env')
   | (SplApply(e1,e2))                                -> let (e1',env') = (eval env e1) in (SplApply(e1',e2), env')
 
   (*Predefined functions*)
-  | (SplShow(SplNumber n)) -> ((let p = 
+  | (SplShow(SplNumber n)) -> ((let p =
       (print_float n; print_string "\n") in SplNumber(n)), env)
-  | (SplShow(SplBoolean n)) -> ((let p = 
-      (print_string (if n then "true\n" else "false\n")) in 
+  | (SplShow(SplBoolean n)) -> ((let p =
+      (print_string (if n then "true\n" else "false\n")) in
         SplBoolean(n)), env)
-  | (SplShow(SplList(n))) -> ((let p = 
+  | (SplShow(SplList(n))) -> ((let p =
       (print_list n; print_string "\n") in (SplList n)), env)
   | (SplShow(SplString(n))) -> ((let p =
       (print_string n; print_string "\n") in (SplString n)), env)
@@ -381,15 +387,11 @@ let evalProg e = evalloop (Env []) e ;;
 
 let rename (s:string) = s^"'";;
 
-
-
-
-
 let print_res res = match res with
     | (SplNumber i) -> print_float i ; print_string " : Number"
     | (SplBoolean b) -> print_string (if b then "true" else "false") ; print_string " : Bool"
     | (SplString s) -> print_string s
-    | (SplAbs(tT,x,e)) -> print_string("Function : "^type_to_string( typeProg (res) ))
+    | (SplAbs(rT,n,tT,x,e)) -> print_string("Function : "^type_to_string( typeProg (res) ))
     | (SplList l) -> print_string "["; print_list l; print_string "] : List"
     (*Comment up to raise error to stop debugging*)
     (* | (SplApply(e1, e2)) -> print_string "apply"

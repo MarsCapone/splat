@@ -6,7 +6,7 @@
 %token <float> NUMBER
 %token <string> IDENT
 %token <string> STRING
-%token BOOLEAN_TYPE NUMBER_TYPE STRING_TYPE STREAM_TYPE LIST_TYPE VOID_TYPE FUNCTION_TYPE 
+%token BOOLEAN_TYPE NUMBER_TYPE STRING_TYPE STREAM_TYPE LIST_TYPE VOID_TYPE FUNCTION_TYPE
 /*Operators*/
 %token PLUS MINUS TIMES DIVIDE MODULO NOT POWER_OF OR AND
 %token FOR FOREVER IN
@@ -73,7 +73,7 @@ expr:
     | STRING                        { SplString $1 }
     | IDENT                         { SplVariable $1 }
 
-    | FUNCTION_TYPE LPAREN type_spec IDENT RPAREN SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT { SplAbs ($3, $4, $7) }
+    | FUNCTION_TYPE type_spec IDENT LPAREN type_spec IDENT RPAREN SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT { SplAbs ($2, $3, $5, $6, $9) }
     | LPAREN expr RPAREN            { $2 }
     | expr APPLY expr               { SplApply ($1, $3) }
 
@@ -109,7 +109,7 @@ expr:
     | HEAD expr                     { SplHead $2 }
     | TAIL expr                     { SplTail $2 }
     | STDIN                         { SplList (
-        let rec readlines ic = 
+        let rec readlines ic =
             try let line = SplString(input_line ic) in
                 line :: readlines ic
             with End_of_file -> [] in

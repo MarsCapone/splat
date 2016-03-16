@@ -56,7 +56,7 @@ type splTerm =
 
 (*Function stuff*)
     | SplApply of splTerm * splTerm
-    | SplAbs of splType * string * splTerm
+    | SplAbs of splType * string * splType * string * splTerm
 
 val typeProg : splTerm -> splType
 val evalProg :  splTerm -> splTerm
