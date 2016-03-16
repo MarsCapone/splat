@@ -71,7 +71,6 @@ expr:
     | LET SQUARE_BRACE_LEFT IDENT EQUALS expr SQUARE_BRACE_RIGHT SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT { SplLet ($3, $5, $8) }
 
     | NUMBER                        { SplNumber $1 }
-    | STRING                        { SplString $1 }
     | IDENT                         { SplVariable $1 }
 
     | FUNCTION_TYPE type_spec IDENT LPAREN type_spec IDENT RPAREN SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT { SplAbs ($2, $3, $5, $6, $9) }
@@ -115,6 +114,8 @@ expr:
                 line :: readlines ic
             with End_of_file -> [] in
         readlines Pervasives.stdin ) }
+
+    | SPLIT expr                    { SplSplit $2 }
 
     /*Predefined functions*/
     | SHOW expr                     { SplShow $2 }

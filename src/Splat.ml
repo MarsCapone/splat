@@ -79,8 +79,6 @@ let rec isValue e = match e with
     | _ -> false
 ;;
 
-
-
 let rec type_to_string tT = match tT with
   | SplatNumber -> "Number"
   | SplatBoolean -> "Boolean"
@@ -98,6 +96,17 @@ let rec print_list = function
     | SplAbs(rT, n, tT, x, e) :: l -> print_string "function:";
         print_string (type_to_string tT); print_list l
     | _ -> print_string "null"
+
+let rec split s =
+    SplList(let tokens = (Str.split (Str.regexp " ") s) in
+    let rec convert rem =
+        if rem=[] then
+            []
+        else
+            let v = SplString(List.hd rem) in
+                v :: convert (List.tl rem)
+    in convert tokens)
+
 
 (* Type of Environments *)
 
@@ -173,9 +182,12 @@ let rec typeOf env e = match e with
     )
 
     (*Arithmetic*)
-    |SplPlus(e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
-        SplatNumber, SplatNumber -> SplatNumber
-        |_ -> raise (TypeError "PLUS")
+    |SplPlus(e1,e2) -> (
+        let ty1 = typeOf env e1 in
+        let ty2 = typeOf env e2 in
+        match ty1=ty2 with
+        true -> ty1
+        | false -> raise (TypeError "PLUS")
     )
     |SplMinus(e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatNumber
@@ -200,7 +212,7 @@ let rec typeOf env e = match e with
             | _ -> raise (TypeError "CONS")
     )
     | SplHead (e1) -> (
-        typeOf env e1
+        SplatString (*TODO: Make lists support more than just strings*)
     )
     | SplTail (e1) -> (
         match (typeOf env e1) with
@@ -268,6 +280,13 @@ let rec typeOf env e = match e with
         | _ -> raise (TypeError "SHOW")
     )
 
+    | SplSplit (e1) -> (
+        let ty1 = typeOf env e1 in
+        match ty1 with
+            SplatString -> SplatString
+            | _ -> raise (TypeError ("Cannot split type "^(type_to_string(ty1))))
+    )
+
     | SplJustDo (e1, e2) -> (typeOf env e2)
 
     |SplVariable (x) ->  (try lookup env x with LookupError -> raise (TypeError x))
@@ -324,6 +343,9 @@ let rec eval env e = match e with
   (*Arithmetic*)
   | (SplPlus(SplNumber(n),SplNumber(m))) -> (SplNumber( n +. m ) , env)
   | (SplPlus(SplNumber(n), e2))      -> let (e2',env') = (eval env e2) in (SplPlus(SplNumber(n),e2'),env')
+  | (SplPlus(e1, e2))            -> let (e1',env') = (eval env e1) in (SplPlus(e1', e2) ,env')
+  | (SplPlus(SplString(n),SplString(m))) -> (SplString( n ^ m ) , env)
+  | (SplPlus(SplString(n), e2))      -> let (e2',env') = (eval env e2) in (SplPlus(SplString(n),e2'),env')
   | (SplPlus(e1, e2))            -> let (e1',env') = (eval env e1) in (SplPlus(e1', e2) ,env')
 
   | (SplMinus(SplNumber(n),SplNumber(m))) -> (SplNumber( n -. m ) , env)
@@ -393,6 +415,8 @@ let rec eval env e = match e with
             let (e1', env') = (eval env e1) in
                 (e1', env')
 
+  | (SplSplit(SplString(s)))    -> ((split s), env)
+  | (SplSplit(s))               -> let (s', env') = (eval env s) in (SplSplit(s'), env')
 
 
   | _ -> raise Terminated ;;
