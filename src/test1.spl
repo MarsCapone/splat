@@ -1,9 +1,13 @@
-function list f1 (number i1) {
-    function list f2 (number i2) {
+function number f1 (number i1) {
+    function number f2 (number i2) {
         if (i1 > 100) {
-            []
+            0
         } else {
-            (i1+i2) :: (f1 #i2 #(i1 + i2))
+            let [v = (i1 + i2)] {
+                let [s = showln v] {
+                    f1 #i2 #v
+                }
+            }
         }
     }
 }#0 #1
