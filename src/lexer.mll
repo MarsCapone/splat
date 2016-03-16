@@ -18,6 +18,7 @@ rule lexer_main = parse
     | "function"  { FUNCTION_TYPE }
 
 (*Flow*)
+    | "justdo"  { JUSTDO }
     | "forever" { FOREVER }
     | "for"     { FOR }
     | "in"     { IN }

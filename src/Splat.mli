@@ -30,6 +30,7 @@ type splTerm =
     | SplTail of splTerm
     | SplEmptyList of splTerm
 (* flow *)
+    | SplJustDo of splTerm * splTerm
     | SplFor of splTerm * splTerm * splTerm
     | SplForever of splTerm
     | SplWhile of splTerm * splTerm

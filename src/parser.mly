@@ -9,6 +9,7 @@
 %token BOOLEAN_TYPE NUMBER_TYPE STRING_TYPE STREAM_TYPE LIST_TYPE VOID_TYPE FUNCTION_TYPE
 /*Operators*/
 %token PLUS MINUS TIMES DIVIDE MODULO NOT POWER_OF OR AND
+%token JUSTDO
 %token FOR FOREVER IN
 %token IF THEN ELSE
 %token WHILE
@@ -48,7 +49,7 @@
 %left APPLY
 %right POWER_OF NOT
 %right CONS
-%nonassoc IF THEN ELSE WHILE FOR FOREVER IN
+%nonassoc IF THEN ELSE WHILE FOR FOREVER IN JUSTDO
 
 %start parser_main             /* the entry point */
 %type <Splat.splTerm> parser_main
@@ -117,4 +118,11 @@ expr:
 
     /*Predefined functions*/
     | SHOW expr                     { SplShow $2 }
+    | JUSTDO SCOPE_BRACE_LEFT justdo_expr SCOPE_BRACE_RIGHT 
+        SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  { SplJustDo ($3, $6) }
+;
+
+justdo_expr:
+    expr SEPARATOR justdo_expr      { SplJustDo ($1, $3) }
+    | expr                          { $1 }
 ;
