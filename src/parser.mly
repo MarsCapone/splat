@@ -62,8 +62,6 @@ type_spec:
     | BOOLEAN_TYPE      { SplatBoolean }
     | STRING_TYPE       { SplatString }
     | LIST_TYPE         { SplatList }
-    | STREAM_TYPE       { SplatStream }
-    | VOID_TYPE         { SplatVoid }
     | FUNCTION_TYPE type_spec type_spec { SplatFunction ($2, $3) }
     | LPAREN type_spec RPAREN { $2 }
 ;
@@ -72,6 +70,7 @@ expr:
     | LET SQUARE_BRACE_LEFT IDENT EQUALS expr SQUARE_BRACE_RIGHT SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT { SplLet ($3, $5, $8) }
 
     | NUMBER                        { SplNumber $1 }
+    | STRING                        { SplString $1 }
     | IDENT                         { SplVariable $1 }
 
     | FUNCTION_TYPE LPAREN type_spec IDENT RPAREN SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT { SplAbs ($3, $4, $7) }
@@ -109,8 +108,12 @@ expr:
     | EMPTY_LIST                    { SplList [] }
     | HEAD expr                     { SplHead $2 }
     | TAIL expr                     { SplTail $2 }
-    | EMPTY_STREAM                  { SplStream [<>] }
-    | STDIN                         { SplStream Pervasives.stdin }
+    | STDIN                         { SplList (
+        let rec readlines ic = 
+            try let line = SplString(input_line ic) in
+                line :: readlines ic
+            with End_of_file -> [] in
+        readlines Pervasives.stdin ) }
 
     /*Predefined functions*/
     | SHOW expr                     { SplShow $2 }

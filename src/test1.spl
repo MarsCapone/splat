@@ -1,5 +1,1 @@
-function (number v) {
-    function (number l) {
-        v + l
-    }
-} #10 #5
+stdin

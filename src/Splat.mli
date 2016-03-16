@@ -4,8 +4,6 @@ type splType =
     | SplatBoolean
     | SplatString
     | SplatList
-    | SplatStream
-    | SplatVoid
     | SplatFunction of splType * splType
 
 (* Grammar of the language *)
@@ -14,8 +12,6 @@ type splTerm =
     | SplBoolean of bool
     | SplString of string
     | SplList of splTerm list
-    | SplStream of Stream.t
-    | SplVoid of unit
     | SplVariable of string
 (* number operators *)
     | SplPlus of splTerm * splTerm
