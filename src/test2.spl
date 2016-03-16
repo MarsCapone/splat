@@ -1,7 +1,1 @@
-function number f (number i) {
-    if i == 10 {
-        55
-    } else {
-        f #10
-    }
-} #1
+9 :: 5 :: 6 :: (7 :: 2 :: []) :: 17 :: []

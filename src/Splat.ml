@@ -163,9 +163,13 @@ let rec typeOf env e = match e with
         SplatNumber, SplatNumber -> SplatBoolean
         | _ -> raise (TypeError "NOT_EQUALS")
     )
-    |SplEq (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
-        SplatNumber, SplatNumber -> SplatBoolean
-        | _ -> raise (TypeError "EQUALS")
+    |SplEq (e1,e2) -> (
+        let ty1 = typeOf env e1 in
+        let ty2 = typeOf env e2 in
+        (match (ty1=ty2) with
+            true -> SplatBoolean
+            | false -> raise (TypeError "= must use same types!")
+        )
     )
 
     (*Arithmetic*)
@@ -191,8 +195,8 @@ let rec typeOf env e = match e with
     )
 
     | SplCons(e1, e2) -> (
-        match (typeOf env e1), (typeOf env e2) with
-            _, SplatList -> SplatList
+        match (typeOf env e2) with
+            SplatList -> SplatList
             | _ -> raise (TypeError "CONS")
     )
     | SplHead (e1) -> (
@@ -312,9 +316,9 @@ let rec eval env e = match e with
   | (SplNe(SplNumber(n), e2))      -> let (e2',env') = (eval env e2) in (SplNe(SplNumber(n),e2'),env')
   | (SplNe(e1, e2))            -> let (e1',env') = (eval env e1) in (SplNe(e1',e2),env')
 
-  | (SplEq(SplNumber(n),SplNumber(m))) -> (SplBoolean( n = m ) , env)
-  | (SplEq(SplNumber(n), e2))      -> let (e2',env') = (eval env e2) in (SplEq(SplNumber(n),e2'),env')
-  | (SplEq(e1, e2))            -> let (e1',env') = (eval env e1) in (SplEq(e1',e2),env')
+  | (SplEq(n, m)) when (isValue(n) && isValue(m))   -> (SplBoolean( n = m ) , env)
+  | (SplEq(n, m)) when (isValue(n))                 -> let (m',env') = (eval env m) in (SplEq(n, m'),env')
+  | (SplEq(n, m))                                   -> let (n',env') = (eval env n) in (SplEq(n', m),env')
   (*TODO?: Boolean equals / not_equals*)
 
   (*Arithmetic*)
@@ -346,12 +350,13 @@ let rec eval env e = match e with
   | (SplIfElse(SplBoolean(n), e2, e3)) -> ((if n then e2 else e3), env)
   | (SplIfElse(e1, e2, e3))            -> let (e1',env') = (eval env e1) in (SplIfElse(e1', e2, e3) ,env')
 
-  | (SplCons(SplNumber(n), SplList(m))) -> (SplList( SplNumber(n) :: m ), env)
-  | (SplCons(SplNumber(n), e2)) -> let (e2', env') = (eval env e2) in (SplCons(SplNumber(n), e2'), env')
+  | (SplCons(n, SplList(m))) when (isValue(n))  -> (SplList( n :: m ), env)
+  | (SplCons(n, e2)) when (isValue(n))          -> let (e2', env') = (eval env e2) in (SplCons(n, e2'), env')
+  | (SplCons(n, e2))                            -> let (n', env') = (eval env n) in (SplCons(n', e2), env')
 
   | (SplHead(SplList(n))) -> (match n with
         h :: _ when (isValue h) -> (h, env)
-        | [] -> raise OutOfBounds
+        | [] -> (SplList(n), env)
         | _ -> raise SyntaxError
   )
   | (SplHead(e1)) -> let (e1', env') = (eval env e1) in (SplHead (e1'), env')
@@ -373,7 +378,7 @@ let rec eval env e = match e with
 
   (*Predefined functions*)
   | (SplShow(SplNumber n)) -> ((let p =
-      (print_float n; print_string "\n") in SplNumber(n)), env)
+      (print_int (int_of_float n); print_string "\n") in SplNumber(n)), env)
   | (SplShow(SplBoolean n)) -> ((let p =
       (print_string (if n then "true\n" else "false\n")) in
         SplBoolean(n)), env)
@@ -383,9 +388,9 @@ let rec eval env e = match e with
       (print_string n; print_string "\n") in (SplString n)), env)
   | (SplShow(e1)) -> let (e1', env') = (eval env e1) in (SplShow(e1'), env')
 
-  | (SplJustDo(n, e1)) -> 
-          let p, _ = (eval env n) in 
-            let (e1', env') = (eval env e1) in 
+  | (SplJustDo(n, e1)) ->
+          let p, _ = (eval env n) in
+            let (e1', env') = (eval env e1) in
                 (e1', env')
 
 
@@ -399,7 +404,7 @@ let evalProg e = evalloop (Env []) e ;;
 let rename (s:string) = s^"'";;
 
 let print_res res = match res with
-    | (SplNumber i) -> print_float i ; print_string " : Number"
+    | (SplNumber i) -> print_int (int_of_float i) ; print_string " : Number"
     | (SplBoolean b) -> print_string (if b then "true" else "false") ; print_string " : Bool"
     | (SplString s) -> print_string s
     | (SplAbs(rT,n,tT,x,e)) -> print_string("Function : "^type_to_string( typeProg (res) ))

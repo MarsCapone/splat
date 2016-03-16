@@ -1,9 +1,11 @@
-function stream task1 (stream splat) = {
-    show 0¬
-    for (string s) in splat {
-        show s¬
+let [zero = show 0] {
+    function list t1 (list splat) {
+        if splat == [] {
+            []
+        } else {
+            let [s = show (head splat)] {
+                t1 #(tail splat)
+            }
+        }
     }
-}
-
-
-task1 stdin¬
+} #stdin

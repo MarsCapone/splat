@@ -118,7 +118,7 @@ expr:
 
     /*Predefined functions*/
     | SHOW expr                     { SplShow $2 }
-    | JUSTDO SCOPE_BRACE_LEFT justdo_expr SCOPE_BRACE_RIGHT 
+    | JUSTDO SCOPE_BRACE_LEFT justdo_expr SCOPE_BRACE_RIGHT
         SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  { SplJustDo ($3, $6) }
 ;
 
