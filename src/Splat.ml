@@ -41,6 +41,7 @@ type splTerm =
     | SplTail of splTerm
     | SplEmptyList of splTerm
 (* flow *)
+    | SplJustDo of splTerm * splTerm
     | SplFor of splTerm * splTerm * splTerm
     | SplForever of splTerm
     | SplWhile of splTerm * splTerm
@@ -253,6 +254,8 @@ let rec typeOf env e = match e with
         | _ -> raise (TypeError "SHOW")
     )
 
+    | SplJustDo (e1, e2) -> (typeOf env e2)
+
     |SplVariable (x) ->  (try lookup env x with LookupError -> raise (TypeError x))
 
 let typeProg e = typeOf (Env []) e ;;
@@ -262,6 +265,7 @@ let rec eval env e = match e with
   | (SplVariable x) -> (try ((lookup env x) , env) with LookupError -> raise UnboundVariableError)
   | (SplNumber n) -> raise Terminated
   | (SplBoolean b) -> raise Terminated
+  | (SplString s) -> raise Terminated
   | (SplList l) -> raise Terminated
   | (SplAbs(tT,x,e')) -> raise Terminated
 
@@ -372,6 +376,13 @@ let rec eval env e = match e with
   | (SplShow(SplString(n))) -> ((let p =
       (print_string n; print_string "\n") in (SplString n)), env)
   | (SplShow(e1)) -> let (e1', env') = (eval env e1) in (SplShow(e1'), env')
+
+  | (SplJustDo(n, e1)) -> 
+          let p, _ = (eval env n) in 
+            let (e1', env') = (eval env e1) in 
+                (e1', env')
+
+
 
   | _ -> raise Terminated ;;
 
