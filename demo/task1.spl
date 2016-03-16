@@ -1,7 +1,7 @@
 let [zero = show 0] {
-    function list t1 (list splat) {
+    function number t1 (list splat) {
         if splat == [] {
-            []
+            0
         } else {
             let [s = showln (head splat)] {
                 t1 #(tail splat)
