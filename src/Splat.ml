@@ -365,10 +365,12 @@ let rec eval env e = match e with
   | (SplShow(SplNumber n)) -> ((let p = 
       (print_float n; print_string "\n") in SplNumber(n)), env)
   | (SplShow(SplBoolean n)) -> ((let p = 
-      (print_string (if n then "true" else "false")) in 
+      (print_string (if n then "true\n" else "false\n")) in 
         SplBoolean(n)), env)
-  | (SplShow(SplList(n))) -> ((let p = (print_list n) in
-    (SplList n)), env)
+  | (SplShow(SplList(n))) -> ((let p = 
+      (print_list n; print_string "\n") in (SplList n)), env)
+  | (SplShow(SplString(n))) -> ((let p =
+      (print_string n; print_string "\n") in (SplString n)), env)
   | (SplShow(e1)) -> let (e1', env') = (eval env e1) in (SplShow(e1'), env')
 
   | _ -> raise Terminated ;;

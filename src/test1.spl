@@ -1,1 +1,7 @@
-stdin
+function t1 (list l) {
+    let [p = show 0] {
+        if (head l) == [] 
+            { [] }
+            { let [q = show (head l)] 
+                { t1 (tail l) }}}
+} stdin
