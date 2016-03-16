@@ -16,6 +16,7 @@
 OBJS = parser.cmo lexer.cmo Splat.cmo main.cmo 
 
 COMMONOBJS = str.cma
+PACKAGES = core
 
 # Files that need to be generated from other files
 DEPEND += lexer.ml parser.ml

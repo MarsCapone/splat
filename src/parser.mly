@@ -1,6 +1,7 @@
 /* File parser.mly */
 %{
     open Splat
+    open Pervasives
 %}
 %token <float> NUMBER
 %token <string> IDENT
@@ -13,14 +14,12 @@
 %token WHILE
 %token SWITCH
 %token CONS
-%token HEAD TAIL EMPTY_LIST
-
+%token HEAD TAIL EMPTY_LIST EMPTY_STREAM
 %token BREAK CONTINUE RETURN APPLY
 /*Predefined*/
 %token TRUE FALSE
 %token STDIN
 %token END_OF_STATEMENT EOF
-%token EMPTY_LIST
 /*Comparators*/
 %token LESS_THAN LESS_THAN_EQUAL GREATER_THAN GREATER_THAN_EQUAL EQUAL_TO NOT_EQUAL_TO
 /*Scope*/
@@ -37,7 +36,6 @@
 %token LPAREN RPAREN
 /*Associativity and precedence*/
 %left SEPARATOR             /*Lowest precedence*/
-%left CONS
 %right HEAD TAIL
 %right EQUALS PLUS_EQUALS MINUS_EQUALS MULTIPLY_EQUALS DIVIDE_EQUALS
 %left OR
@@ -64,6 +62,7 @@ type_spec:
     | BOOLEAN_TYPE      { SplatBoolean }
     | STRING_TYPE       { SplatString }
     | LIST_TYPE         { SplatList }
+    | STREAM_TYPE       { SplatStream }
     | VOID_TYPE         { SplatVoid }
     | FUNCTION_TYPE type_spec type_spec { SplatFunction ($2, $3) }
     | LPAREN type_spec RPAREN { $2 }
@@ -110,6 +109,8 @@ expr:
     | EMPTY_LIST                    { SplList [] }
     | HEAD expr                     { SplHead $2 }
     | TAIL expr                     { SplTail $2 }
+    | EMPTY_STREAM                  { SplStream [<>] }
+    | STDIN                         { SplStream Pervasives.stdin }
 
     /*Predefined functions*/
     | SHOW expr                     { SplShow $2 }

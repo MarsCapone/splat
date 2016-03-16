@@ -50,6 +50,7 @@ rule lexer_main = parse
     | "or"     { OR }
     | "and"    { AND }
     | "::"      { CONS }
+    | "[<>]"    { EMPTY_STREAM }
     | "[]"      { EMPTY_LIST }
 
 (*Comparators*)

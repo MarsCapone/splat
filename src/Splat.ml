@@ -15,6 +15,7 @@ type splType =
     | SplatBoolean
     | SplatString
     | SplatList
+    | SplatStream
     | SplatVoid
     | SplatFunction of splType * splType
 
@@ -24,6 +25,7 @@ type splTerm =
     | SplBoolean of bool
     | SplString of string
     | SplList of splTerm list
+    | SplStream of Stream.t
     | SplVoid of unit
     | SplVariable of string
 (* number operators *)
@@ -128,6 +130,7 @@ let rec typeOf env e = match e with
     |SplBoolean (b) -> SplatBoolean
     |SplString (s) -> SplatString
     |SplList (l) -> SplatList
+    | SplStream (s) -> SplatStream 
 
     (*Boolean operators*)
     |SplAnd (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
@@ -255,6 +258,8 @@ let rec typeOf env e = match e with
         | _ -> raise (TypeError "SHOW")
     )
 
+    | SplStream (e1) -> (SplatStream) 
+
     |SplVariable (x) ->  (try lookup env x with LookupError -> raise (TypeError x))
 
 let typeProg e = typeOf (Env []) e ;;
@@ -355,6 +360,7 @@ let rec eval env e = match e with
         | [] -> raise OutOfBounds
     )
   | (SplTail(e1)) -> let (e1', env') = (eval env e1) in (SplTail(e1'), env')
+
 
   (*Assignment*)
   | (SplLet(n, m, e3)) when (isValue(m) )-> (e3, addBinding env n m)
