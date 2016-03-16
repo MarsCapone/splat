@@ -63,8 +63,10 @@ type splTerm =
     | SplLet of string * splTerm * splTerm
 (* predefined functions *)
     | SplShow of splTerm
+    | SplShowLn of splTerm
     | SplRange of splTerm * splTerm * splTerm
     | SplSplit of splTerm
+    | SplAsNum of splTerm
 
 (*Function stuff*)
     | SplApply of splTerm * splTerm
@@ -182,12 +184,9 @@ let rec typeOf env e = match e with
     )
 
     (*Arithmetic*)
-    |SplPlus(e1,e2) -> (
-        let ty1 = typeOf env e1 in
-        let ty2 = typeOf env e2 in
-        match ty1=ty2 with
-        true -> ty1
-        | false -> raise (TypeError "PLUS")
+    |SplPlus(e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
+        SplatNumber, SplatNumber -> SplatNumber
+        |_ -> raise (TypeError "PLUS")
     )
     |SplMinus(e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatNumber
@@ -209,7 +208,7 @@ let rec typeOf env e = match e with
     | SplCons(e1, e2) -> (
         match (typeOf env e2) with
             SplatList -> SplatList
-            | _ -> raise (TypeError "CONS")
+            | _ -> raise (TypeError ("Cons (::) cannot be applied to types "^type_to_string(typeOf env e1)^" and "^type_to_string(typeOf env e2)))
     )
     | SplHead (e1) -> (
         SplatString (*TODO: Make lists support more than just strings*)
@@ -264,7 +263,7 @@ let rec typeOf env e = match e with
 
     |SplAbs (rT, n, tT, x, e) ->  (
         let retType = rT in
-        let ty1 = typeOf (addBinding (addBinding env n (SplatFunction(tT, rT))) x tT) e in
+        let ty1 = typeOf (addBinding (addBinding env n (SplatFunction(tT, retType))) x tT) e in
         (
             match ty1 with
                 SplatFunction(p, r) -> ty1
@@ -280,11 +279,26 @@ let rec typeOf env e = match e with
         | _ -> raise (TypeError "SHOW")
     )
 
+    | SplShowLn (e1) -> (match (typeOf env e1) with
+        SplatNumber -> SplatNumber
+        | SplatBoolean -> SplatBoolean
+        | SplatString -> SplatString
+        | SplatList -> SplatList
+        | _ -> raise (TypeError "SHOWLN")
+    )
+
     | SplSplit (e1) -> (
         let ty1 = typeOf env e1 in
         match ty1 with
             SplatString -> SplatString
             | _ -> raise (TypeError ("Cannot split type "^(type_to_string(ty1))))
+    )
+
+    | SplAsNum (e1) -> (
+        let ty1 = typeOf env e1 in
+        match ty1 with
+            SplatString -> SplatNumber
+            | _ -> raise (TypeError ("as_num cannot operate on type "^(type_to_string(ty1))))
     )
 
     | SplJustDo (e1, e2) -> (typeOf env e2)
@@ -344,9 +358,6 @@ let rec eval env e = match e with
   | (SplPlus(SplNumber(n),SplNumber(m))) -> (SplNumber( n +. m ) , env)
   | (SplPlus(SplNumber(n), e2))      -> let (e2',env') = (eval env e2) in (SplPlus(SplNumber(n),e2'),env')
   | (SplPlus(e1, e2))            -> let (e1',env') = (eval env e1) in (SplPlus(e1', e2) ,env')
-  | (SplPlus(SplString(n),SplString(m))) -> (SplString( n ^ m ) , env)
-  | (SplPlus(SplString(n), e2))      -> let (e2',env') = (eval env e2) in (SplPlus(SplString(n),e2'),env')
-  | (SplPlus(e1, e2))            -> let (e1',env') = (eval env e1) in (SplPlus(e1', e2) ,env')
 
   | (SplMinus(SplNumber(n),SplNumber(m))) -> (SplNumber( n -. m ) , env)
   | (SplMinus(SplNumber(n), e2))      -> let (e2',env') = (eval env e2) in (SplMinus(SplNumber(n),e2'),env')
@@ -400,15 +411,26 @@ let rec eval env e = match e with
 
   (*Predefined functions*)
   | (SplShow(SplNumber n)) -> ((let p =
-      (print_int (int_of_float n); print_string "\n") in SplNumber(n)), env)
+      (print_int (int_of_float n); print_string " ") in SplNumber(n)), env)
   | (SplShow(SplBoolean n)) -> ((let p =
-      (print_string (if n then "true\n" else "false\n")) in
+      (print_string (if n then "true " else "false ")) in
         SplBoolean(n)), env)
   | (SplShow(SplList(n))) -> ((let p =
-      (print_list n; print_string "\n") in (SplList n)), env)
+      (print_list n; print_string " ") in (SplList n)), env)
   | (SplShow(SplString(n))) -> ((let p =
-      (print_string n; print_string "\n") in (SplString n)), env)
+      (print_string n; print_string " ") in (SplString n)), env)
   | (SplShow(e1)) -> let (e1', env') = (eval env e1) in (SplShow(e1'), env')
+
+  | (SplShowLn(SplNumber n)) -> ((let p =
+      (print_int (int_of_float n); print_string "\n") in SplNumber(n)), env)
+  | (SplShowLn(SplBoolean n)) -> ((let p =
+      (print_string (if n then "true\n" else "false\n")) in
+        SplBoolean(n)), env)
+  | (SplShowLn(SplList(n))) -> ((let p =
+      (print_list n; print_string "\n") in (SplList n)), env)
+  | (SplShowLn(SplString(n))) -> ((let p =
+      (print_string n; print_string "\n") in (SplString n)), env)
+  | (SplShowLn(e1)) -> let (e1', env') = (eval env e1) in (SplShowLn(e1'), env')
 
   | (SplJustDo(n, e1)) ->
           let p, _ = (eval env n) in
@@ -418,6 +440,8 @@ let rec eval env e = match e with
   | (SplSplit(SplString(s)))    -> ((split s), env)
   | (SplSplit(s))               -> let (s', env') = (eval env s) in (SplSplit(s'), env')
 
+  | (SplAsNum(SplString(s)))    -> (SplNumber(float_of_string s), env)
+  | (SplAsNum(s))               -> let (s', env') = (eval env s) in (SplAsNum(s'), env')
 
   | _ -> raise Terminated ;;
 

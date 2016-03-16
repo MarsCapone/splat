@@ -52,8 +52,10 @@ type splTerm =
     | SplLet of string * splTerm * splTerm
 (* predefined functions *)
     | SplShow of splTerm
+    | SplShowLn of splTerm
     | SplRange of splTerm * splTerm * splTerm
     | SplSplit of splTerm
+    | SplAsNum of splTerm
 
 (*Function stuff*)
     | SplApply of splTerm * splTerm

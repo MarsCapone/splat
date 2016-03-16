@@ -15,7 +15,7 @@
 %token WHILE
 %token SWITCH
 %token CONS
-%token HEAD TAIL EMPTY_LIST EMPTY_STREAM
+%token HEAD TAIL EMPTY_LIST EMPTY_STREAM AS_NUM
 %token BREAK CONTINUE RETURN APPLY
 /*Predefined*/
 %token TRUE FALSE
@@ -28,7 +28,7 @@
 /*Assignments*/
 %token EQUALS PLUS_EQUALS MINUS_EQUALS MULTIPLY_EQUALS DIVIDE_EQUALS
 /*Functions*/
-%token SHOW RANGE SPLIT
+%token SHOW SHOWLN RANGE SPLIT
 /*Other*/
 %token SQUARE_BRACE_LEFT SQUARE_BRACE_RIGHT LET
 %token SEPARATOR
@@ -36,8 +36,10 @@
 %token ESCAPE_CHAR
 %token LPAREN RPAREN
 /*Associativity and precedence*/
-%left SEPARATOR             /*Lowest precedence*/
-%right HEAD TAIL
+%left SEPARATOR           /*Lowest precedence*/
+%right CONS
+%right HEAD TAIL AS_NUM
+%left APPLY
 %right EQUALS PLUS_EQUALS MINUS_EQUALS MULTIPLY_EQUALS DIVIDE_EQUALS
 %left OR
 %left AND
@@ -46,9 +48,7 @@
 %left PLUS MINUS
 %left DIVIDE MODULO
 %left TIMES
-%left APPLY
 %right POWER_OF NOT
-%right CONS
 %nonassoc IF THEN ELSE WHILE FOR FOREVER IN JUSTDO
 
 %start parser_main             /* the entry point */
@@ -74,8 +74,8 @@ expr:
     | IDENT                         { SplVariable $1 }
 
     | FUNCTION_TYPE type_spec IDENT LPAREN type_spec IDENT RPAREN SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT { SplAbs ($2, $3, $5, $6, $9) }
-    | LPAREN expr RPAREN            { $2 }
     | expr APPLY expr               { SplApply ($1, $3) }
+    | LPAREN expr RPAREN            { $2 }
 
     /*Booleans*/
     | FALSE                         { SplBoolean false }
@@ -116,8 +116,10 @@ expr:
         readlines Pervasives.stdin ) }
 
     | SPLIT expr                    { SplSplit $2 }
+    | AS_NUM expr                   { SplAsNum $2 }
 
     /*Predefined functions*/
+    | SHOWLN expr                   { SplShowLn $2 }
     | SHOW expr                     { SplShow $2 }
     | JUSTDO SCOPE_BRACE_LEFT justdo_expr SCOPE_BRACE_RIGHT
         SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  { SplJustDo ($3, $6) }

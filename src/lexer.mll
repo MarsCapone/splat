@@ -74,11 +74,13 @@ rule lexer_main = parse
     | '='      { EQUALS }
 
 (*Functions*)
+    | "showln"    { SHOWLN }
     | "show"      { SHOW }
     | "range"     { RANGE }
     | "split"     { SPLIT }
     | "head"      { HEAD }
     | "tail"      { TAIL }
+    | "as_num"    { AS_NUM }
 
 (*Other*)
     | '['     { SQUARE_BRACE_LEFT }

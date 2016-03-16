@@ -1,9 +1,9 @@
-function stream task3 (stream splat) = {
-    for (string s) in splat {
-        (number a), (number b) = s¬
-        show (a + 3 * b)¬
+function number t3 (number splat) {
+    if splat==10 {
+        0
+    } else {
+        let [s = showln splat] {
+            t3 #(t3 #splat+1)
+        }
     }
-}
-
-task3 stdin¬
-
+} #1
