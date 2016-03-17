@@ -81,7 +81,7 @@ rule lexer_main = parse
     | "split"     { SPLIT }
     | "head"      { HEAD }
     | "tail"      { TAIL }
-    | "as_num"    { AS_NUM }
+    | "num"       { AS_NUM }
 
 (*Other*)
     | '['     { SQUARE_BRACE_LEFT }

@@ -1,13 +1,4 @@
-function number f1 (number i1) {
-    function number f2 (number i2) {
-        if (i1 > 100) {
-            0
-        } else {
-            let [v = (i1 + i2)] {
-                let [s = showln v] {
-                    f1 #i2 #v
-                }
-            }
-        }
-    }
-}#0 #1
+let [y = 5 +7 ] {
+    justdo  { show 4, show y, showln 6}
+            { 5 :: [] }
+}

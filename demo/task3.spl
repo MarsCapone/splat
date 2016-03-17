@@ -4,8 +4,8 @@ function number t3 (list splat) {
     if splat == [] {
         0
     } else {
-        let [v1 = (as_num (head (split (head splat))))] {
-            let [v2 = (as_num (head (tail (split (head splat)))))] {
+        let [v1 = (num (head (split (head splat))))] {
+            let [v2 = (num (head (tail (split (head splat)))))] {
                 let [s = (showln v1 + (v2*3)) ] {
                     t3 #(tail splat)
                 }

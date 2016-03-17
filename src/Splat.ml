@@ -100,6 +100,7 @@ let rec print_list = function
         print_string (type_to_string tT); print_list l
     | _ -> print_string "null"
 
+
 let rec split s =
     SplList(let tokens = (Str.split (Str.regexp " ") s) in
     let rec convert rem =
@@ -314,6 +315,16 @@ let rec typeOf env e = match e with
 
 let typeProg e = typeOf (Env []) e ;;
 
+let print_res res = match res with
+    | (SplNumber i) -> print_int (int_of_float i) ; print_string " : Number"
+    | (SplBoolean b) -> print_string (if b then "true" else "false") ; print_string " : Bool"
+    | (SplString s) -> print_string s
+    | (SplAbs(rT,n,tT,x,e)) -> print_string("Function : "^type_to_string( typeProg (res) ))
+    | (SplList l) -> print_string "["; print_list l; print_string "] : List"
+    (*Comment up to raise error to stop debugging*)
+    (* | (SplApply(e1, e2)) -> print_string "apply"
+    | (SplLet(e1, e2, e3)) -> print_string "let" *)
+    | _ -> raise NonBaseTypeResult
 
 let rec eval env e = match e with
   | (SplVariable x) -> (try ((lookup env x) , env) with LookupError -> raise (UnboundVariableError x))
@@ -437,15 +448,12 @@ let rec eval env e = match e with
       (print_list n; print_string "\n") in (SplList n)), env)
   | (SplShowLn(SplString(n))) -> ((let p =
       (print_string n; print_string "\n") in (SplString n)), env)
-  | (SplShowLn(e1)) -> let (e1', env') = (eval env e1) in (SplShowLn(e1'), env')
+  | (SplShowLn(e1)) -> let (e1', env') = (eval env e1) in SplShowLn(e1'),env'
 
-
-  | (SplJustDo(n, m)) ->
-          let p, _ = (eval env n) in (m, env)
-  | (SplJustDo(n, e1)) ->
-          let p, _ = (eval env n) in
-            let (e1', env') = (eval env e1) in
-                (e1', env')
+  | (SplJustDo(e1, e2)) -> (
+        let p,_ = (eval env e1) in
+            (eval env e2)
+    )
 
   | (SplSplit(SplString(s)))    -> ((split s), env)
   | (SplSplit(s))               -> let (s', env') = (eval env s) in (SplSplit(s'), env')
@@ -460,14 +468,3 @@ let rec evalloop env e = try (let (e',env') = (eval env e) in (evalloop env' e')
 let evalProg e = evalloop (Env []) e ;;
 
 let rename (s:string) = s^"'";;
-
-let print_res res = match res with
-    | (SplNumber i) -> print_int (int_of_float i) ; print_string " : Number"
-    | (SplBoolean b) -> print_string (if b then "true" else "false") ; print_string " : Bool"
-    | (SplString s) -> print_string s
-    | (SplAbs(rT,n,tT,x,e)) -> print_string("Function : "^type_to_string( typeProg (res) ))
-    | (SplList l) -> print_string "["; print_list l; print_string "] : List"
-    (*Comment up to raise error to stop debugging*)
-    (* | (SplApply(e1, e2)) -> print_string "apply"
-    | (SplLet(e1, e2, e3)) -> print_string "let" *)
-    | _ -> raise NonBaseTypeResult

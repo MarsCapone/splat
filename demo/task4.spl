@@ -5,7 +5,7 @@ function number t4 (list splat) {
         if splat == [] {
             0
         } else {
-            let [v = (acc + (as_num (head splat)))] {
+            let [v = (acc + (num (head splat)))] {
                 let [s = showln v] {
                     t4 #(tail splat) #v
                 }

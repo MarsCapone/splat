@@ -38,7 +38,7 @@
 /*Associativity and precedence*/
 %left SEPARATOR           /*Lowest precedence*/
 %right CONS
-%right HEAD TAIL AS_NUM
+%right HEAD TAIL AS_NUM SHOW
 %left APPLY
 %right EQUALS PLUS_EQUALS MINUS_EQUALS MULTIPLY_EQUALS DIVIDE_EQUALS
 %left OR
