@@ -93,3 +93,4 @@ rule lexer_main = parse
     | '\\'    { ESCAPE_CHAR }
 
     | ['a'-'z''A'-'Z''0'-'9']+ as lxm { IDENT(lxm) }
+    | ['^''"']* as str      { STRING(str) }

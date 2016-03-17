@@ -72,6 +72,8 @@ expr:
 
     | NUMBER                        { SplNumber $1 }
     | IDENT                         { SplVariable $1 }
+    | STRING_WRAPPER IDENT STRING_WRAPPER  { SplString $2 }
+    | STRING_WRAPPER STRING STRING_WRAPPER { SplString $2 }
 
     | expr APPLY expr               { SplApply ($1, $3) }
     | FUNCTION_TYPE type_spec IDENT LPAREN type_spec IDENT RPAREN SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT { SplAbs ($2, $3, $5, $6, $9) }

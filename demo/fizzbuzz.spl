@@ -1,65 +1,29 @@
-function stream fizzbuzz (stream splat) = {
-    for (number s) in splat {
-        if s % 3 == 0 and s % 5 == 0 {
-            show 'fizzbuzz'¬
-        } else {
-            if s % 3 == 0 {
-                show 'fizz'¬
-            } else {
-                if s % 5 == 0 {
-                    show 'buzz'¬
-                } else {
-                    show s¬
-                }
-            }
-        }
-    }
-}
-
-function stream fizzbuzz (stream splat) {
-    let [h = head splat] {
-        if h == eof
-            { [] }
-            { if h % 3 == 0
-                { 'fizzbuzz' :: fizzbuzz tail splat }
-                { [] }
-        }
-    }
-}
-
-function stream fizzbuzz_switch (stream splat) = {
-    for (number s) in splat {
-        switch s {
-            s % 3 == 0 and s % 5 == 0 {
-                show 'fizzbuzz'¬
-            }
-            s % 3 == 0 {
-                show 'fizz'¬
-            }
-            s % 5 == 0 {
-                show 'buzz'¬
-            }
-            { show s¬ }
-        }
-    }
-}
-
-function string one_fizzbuzz (number s) = {
-    switch s {
-        s%3==0 and s%5==0 {
-            return 'fizzbuzz'¬
-        }
-        s%3==0 {
-            return 'fizz'¬
-        }
-        s%5==0 {
-            return 'buzz'¬
-        }
-        { return s¬ }
-    }
-
-function stream fizzbuzz_other (stream splat) = {
-    for (number s) in splat {
-        show (one_fizzbuzz s)¬
-    }
-}
+function number fizzbuzz (list splat) {
+    if (head splat) == [] { 
+        0 
+    } else {
+        let [h = (as_num (head splat)) ] {
+            if (h % 3 == 0) and (h % 5 == 0) { 
+                let [ s = (showln "fizzbuzz") ] {
+                    fizzbuzz #(tail splat) 
+                } 
+            } else { 
+                if h % 3 == 0 { 
+                    let [ t = (showln "fizz") ] {
+                        fizzbuzz #(tail splat)
+                    } 
+                } else { 
+                    if h % 5 == 0 { 
+                        let [ u = (showln "buzz") ] {
+                            fizzbuzz #(tail splat) 
+                        } 
+                    } else { 
+                        let [ v = (showln h) ] {
+                            fizzbuzz #(tail splat) 
+                        } 
+                    } 
+                } 
+            } 
+        } 
+    } 
+} #stdin
