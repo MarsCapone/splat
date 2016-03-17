@@ -305,7 +305,7 @@ let rec typeOf env e = match e with
         | SplatBoolean -> SplatBoolean
         | SplatString -> SplatString
         | SplatList -> SplatList
-        | _ -> raise (TypeError "SHOW")
+        | a -> raise (TypeError ("Invalid type: SHOW "^type_to_string(a)))
     )
 
     | SplShowLn (e1) -> (match (typeOf env e1) with
@@ -313,21 +313,22 @@ let rec typeOf env e = match e with
         | SplatBoolean -> SplatBoolean
         | SplatString -> SplatString
         | SplatList -> SplatList
-        | _ -> raise (TypeError "SHOWLN")
+        | a -> raise (TypeError ("Invalid type: SHOWLN"^type_to_string(a)))
     )
 
     | SplSplit (e1) -> (
         let ty1 = typeOf env e1 in
         match ty1 with
             SplatString -> SplatString
-            | _ -> raise (TypeError ("Cannot split type "^(type_to_string(ty1))))
+            | _ -> raise (TypeError ("Invalid type: Cannot SPLIT "
+                ^(type_to_string(ty1))))
     )
 
     | SplAsNum (e1) -> (
         let ty1 = typeOf env e1 in
         match ty1 with
             SplatString -> SplatNumber
-            | _ -> raise (TypeError ("as_num cannot operate on type "^(type_to_string(ty1))))
+            | _ -> raise (TypeError ("Invalid type: NUM cannot operate on "^(type_to_string(ty1))))
     )
 
     | SplJustDo (e1, e2) -> (typeOf env e2)
