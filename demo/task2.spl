@@ -9,3 +9,5 @@ function number t2 (list splat) {
         }
     }
 } #stdin
+
+<| I'm a comment! |>

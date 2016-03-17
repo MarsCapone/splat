@@ -34,7 +34,7 @@
 %token SEPARATOR
 %token STRING_WRAPPER
 %token ESCAPE_CHAR
-%token LPAREN RPAREN
+%token LPAREN RPAREN COMMENT_LEFT COMMENT_RIGHT
 /*Associativity and precedence*/
 %left SEPARATOR           /*Lowest precedence*/
 %right CONS

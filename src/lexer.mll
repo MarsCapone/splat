@@ -3,7 +3,8 @@
 open Parser        (* The type token is defined in parser.mli *)
 }
 rule lexer_main = parse
-    [' ' '\t' '\n']     { lexer_main lexbuf }     (* skip blanks *)
+      '<''|'_*'|''>'      { lexer_main lexbuf }
+    | [' ' '\t' '\n']     { lexer_main lexbuf }     (* skip blanks *)
 
 (*Variables*)
     | '-'?(['0'-'9']*['.'])?['0'-'9']+ as lsm { NUMBER(float_of_string lsm) }
