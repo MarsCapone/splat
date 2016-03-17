@@ -1,5 +1,3 @@
 # splat
 
-Stream Programming Language A.. T..
-
-The Ace Language (for) Programming Streams
+A functional language operating on streams
