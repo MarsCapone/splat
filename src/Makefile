@@ -16,7 +16,6 @@
 OBJS = parser.cmo lexer.cmo Splat.cmo main.cmo 
 
 COMMONOBJS = str.cma
-PACKAGES = core
 
 # Files that need to be generated from other files
 DEPEND += lexer.ml parser.ml
@@ -31,7 +30,7 @@ include .depend
 # Build an executable typechecker
 main: $(OBJS) main.cmo
 	@echo Linking $@
-	ocamlc -o mysplinterpreter $(COMMONOBJS) $(OBJS)
+	ocamlc -o ../mysplinterpreter $(COMMONOBJS) $(OBJS)
 
 # Compile an ML module interface
 %.cmi : %.mli

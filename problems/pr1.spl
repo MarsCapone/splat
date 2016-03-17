@@ -1,6 +1,6 @@
 <| Task 1 - Prints the input with one at start |>
 
-let [zero = show 0] {
+let [zero = showln 0] {
     function number t1 (list splat) {
         if splat == [] {
             0
