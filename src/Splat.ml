@@ -1,10 +1,10 @@
-exception LookupError ;;
+exception LookupError of string;;
 exception TypeError of string;;
 exception UnboundVariableError of string;;
 exception Terminated ;;
-exception NonBaseTypeResult;;
-exception OutOfBounds ;;
-exception SyntaxError ;;
+exception NonBaseTypeResult of string;;
+exception OutOfBounds of string ;;
+exception SyntaxError of string ;;
 
 open Printf;;
 
@@ -119,7 +119,7 @@ type valContext = splTerm context
 
 (* Function to look up the type of a string name variable in a type environment *)
 let rec lookup env str = match env with
-   Env [] -> raise LookupError
+   Env [] -> raise (LookupError ("Lookup value was not in environment: "^str))
   |Env ((name,thing) :: gs) ->
         (
           match (name = str) with
@@ -144,73 +144,87 @@ let rec typeOf env e = match e with
     (*Boolean operators*)
     |SplAnd (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatBoolean, SplatBoolean -> SplatBoolean
-        | _ -> raise (TypeError "AND")
+        | a, b -> raise (TypeError ("Invalid types: "
+            ^type_to_string(a)^" AND "^type_to_string(b)))
     )
     |SplOr (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatBoolean, SplatBoolean -> SplatBoolean
-        | _ -> raise (TypeError "OR")
+        | a, b -> raise (TypeError ("Invalid types: "
+            ^type_to_string(a)^" OR "^type_to_string(b)))
     )
     |SplNot (e1) -> (match (typeOf env e1) with
         SplatBoolean -> SplatBoolean
-        | _ -> raise (TypeError "NOT")
+        | a -> raise (TypeError ("Invalid type: NOT "^type_to_string(a)))
     )
 
     (*Comparisons*)
     |SplLt (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatBoolean
-        | _ -> raise (TypeError "LESS_THAN")
+        | a, b -> raise (TypeError ("Invalid types: "
+            ^type_to_string(a)^" LESS_THAN "^type_to_string(b)))
     )
     |SplGt (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatBoolean
-        | _ -> raise (TypeError "GREATER_THAN")
+        | a, b -> raise (TypeError ("Invalid types: "
+            ^type_to_string(a)^" GREATER_THAN "^type_to_string(b)))
     )
     |SplLe (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatBoolean
-        | _ -> raise (TypeError "LESS_THAN_EQUAL")
+        | a, b -> raise (TypeError ("Invalid types: "
+            ^type_to_string(a)^" LESS_THAN_EQUAL "^type_to_string(b)))
     )
     |SplGe (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatBoolean
-        | _ -> raise (TypeError "GREATER_THAN_EQUAL")
+        | a, b -> raise (TypeError ("Invalid types: "
+            ^type_to_string(a)^" GREATER_THAN_EQUAL "^type_to_string(b)))
     )
     |SplNe (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatBoolean
-        | _ -> raise (TypeError "NOT_EQUALS")
+        | a, b -> raise (TypeError ("Invalid types: "
+            ^type_to_string(a)^" NOT_EQUALS "^type_to_string(b)))
     )
     |SplEq (e1,e2) -> (
         let ty1 = typeOf env e1 in
         let ty2 = typeOf env e2 in
         (match (ty1=ty2) with
             true -> SplatBoolean
-            | false -> raise (TypeError "= must use same types!")
+            | false -> raise (TypeError ("Invalid types: "
+                ^type_to_string(ty1)^" EQUALS "^type_to_string(ty2)))
         )
     )
 
     (*Arithmetic*)
-    |SplPlus(e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
+    | SplPlus(e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatNumber
-        |_ -> raise (TypeError "PLUS")
+        | a, b -> raise (TypeError ("Invalid types: "
+            ^type_to_string(a)^" PLUS "^type_to_string(b)))
     )
-    |SplMinus(e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
+    | SplMinus(e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatNumber
-        |_ -> raise (TypeError "MINUS")
+        | a, b -> raise (TypeError ("Invalid types: "
+            ^type_to_string(a)^" MINUS "^type_to_string(b)))
     )
-    |SplTimes(e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
+    | SplTimes(e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatNumber
-        |_ -> raise (TypeError "TIMES")
+        | a, b -> raise (TypeError ("Invalid types: "
+            ^type_to_string(a)^" TIMES "^type_to_string(b)))
     )
-    |SplDivide(e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
+    | SplDivide(e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatNumber
-        |_ -> raise (TypeError "DIVIDE")
+        | a, b -> raise (TypeError ("Invalid types: "
+            ^type_to_string(a)^" DIVIDE "^type_to_string(b)))
     )
-    |SplModulo(e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
+    | SplModulo(e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
         SplatNumber, SplatNumber -> SplatNumber
-        |_ -> raise (TypeError "MODULO")
+        | a, b -> raise (TypeError ("Invalid types: "
+            ^type_to_string(a)^" MODULO "^type_to_string(b)))
     )
 
     | SplCons(e1, e2) -> (
         match (typeOf env e2) with
             SplatList -> SplatList
-            | _ -> raise (TypeError ("Cons (::) cannot be applied to types "^type_to_string(typeOf env e1)^" and "^type_to_string(typeOf env e2)))
+            | b -> raise (TypeError ("Invalid types: "
+                ^type_to_string(typeOf env e1)^" CONS "^type_to_string(b)))
     )
     | SplHead (e1) -> (
         SplatString (*TODO: Make lists support more than just strings*)
@@ -218,7 +232,7 @@ let rec typeOf env e = match e with
     | SplTail (e1) -> (
         match (typeOf env e1) with
             SplatList -> SplatList
-            | _ -> raise (TypeError "TAIL")
+            | a -> raise (TypeError ("Invalid type: TAIL "^type_to_string(a)))
     )
 
     (*Flow control*)
@@ -233,14 +247,20 @@ let rec typeOf env e = match e with
                         | false -> (
                             match ty1 with
                                 SplatFunction(tT, tU) -> ty2
-                                | _ -> (
+                                | a -> (
                                     match ty2 with
                                         SplatFunction(tT, tU) -> ty1
-                                        | _ -> raise (TypeError "IF_ELSE Internals not same types")
+                                        | b -> raise (TypeError 
+                                        ("Invalid types: "
+                                        ^"Internals do not match: "
+                                        ^"IF "^type_to_string(a)
+                                        ^" ELSE "^type_to_string(b)))
                                     )
                             )
                     ))
-                |_ -> raise (TypeError "IF_ELSE Condition not boolean")
+                | c -> raise (TypeError 
+                    ("Invalid type: Condition is not BOOLEAN: "
+                    ^type_to_string(c)))
     )
 
     |SplLet(e1, e2, e3) -> (
@@ -259,10 +279,12 @@ let rec typeOf env e = match e with
                         * accepting "^type_to_string(tT)^"\n"));*)
                     match tT = ty2 with
                         true -> tU
-                        | false -> raise (TypeError ("Function expected type "^type_to_string(tT)^" but received type "^type_to_string(ty2)))
+                        | false -> raise (TypeError ("Invalid types: Function expected "
+                            ^type_to_string(tT)^" but received "^type_to_string(ty2)))
                 )
                 | _ -> if typechecking_on then
-                            raise (TypeError (type_to_string(ty1)^" APPLY "^(type_to_string(ty2))))
+                            raise (TypeError ("Invalid types: "
+                                ^type_to_string(ty1)^" APPLY "^(type_to_string(ty2))))
                         else
                             ty1
         )
@@ -310,13 +332,21 @@ let rec typeOf env e = match e with
 
     | SplJustDo (e1, e2) -> (typeOf env e2)
 
-    |SplVariable (x) ->  (try lookup env x with LookupError -> raise (TypeError x))
+    | SplVariable (x) ->  (try lookup env x with 
+        (LookupError "Variable does not exist in environment") -> 
+                raise (TypeError "Expression is not a variable"))
+    
+    | _ -> raise (TypeError ("Unmatched function: Type checking does not exist
+    for this function"))
 
 let typeProg e = typeOf (Env []) e ;;
 
 
 let rec eval env e = match e with
-  | (SplVariable x) -> (try ((lookup env x) , env) with LookupError -> raise (UnboundVariableError x))
+  | (SplVariable (x)) -> (try ((lookup env x) , env) with 
+        (LookupError "Variable does not exist in environment") -> 
+            raise (UnboundVariableError "Variable does not exist in current
+            environment"))
   | (SplNumber n) -> raise Terminated
   | (SplBoolean b) -> raise Terminated
   | (SplString s) -> raise Terminated
@@ -397,13 +427,13 @@ let rec eval env e = match e with
   | (SplHead(SplList(n))) -> (match n with
         h :: _ when (isValue h) -> (h, env)
         | [] -> (SplList(n), env)
-        | _ -> raise SyntaxError
+        | _ -> raise (SyntaxError "Cannot take HEAD of unrecognised expression")
   )
   | (SplHead(e1)) -> let (e1', env') = (eval env e1) in (SplHead (e1'), env')
 
   | (SplTail(SplList(n))) -> (match n with
         _ :: t -> (SplList(t), env)
-        | [] -> raise OutOfBounds
+        | [] -> raise (OutOfBounds "At end of list, cannot take tail")
     )
   | (SplTail(e1)) -> let (e1', env') = (eval env e1) in (SplTail(e1'), env')
 
@@ -456,7 +486,9 @@ let rec eval env e = match e with
   | _ -> raise Terminated ;;
 
 
-let rec evalloop env e = try (let (e',env') = (eval env e) in (evalloop env' e')) with Terminated -> if (isValue e) then e else raise (StuckTerm e);;
+let rec evalloop env e = try (let (e',env') = (eval env e) in (evalloop env'
+e')) with Terminated -> if (isValue e) then e else 
+    raise (StuckTerm e) ;;
 let evalProg e = evalloop (Env []) e ;;
 
 let rename (s:string) = s^"'";;
@@ -470,4 +502,4 @@ let print_res res = match res with
     (*Comment up to raise error to stop debugging*)
     (* | (SplApply(e1, e2)) -> print_string "apply"
     | (SplLet(e1, e2, e3)) -> print_string "let" *)
-    | _ -> raise NonBaseTypeResult
+    | _ -> raise (NonBaseTypeResult "Unrecognised base type")
