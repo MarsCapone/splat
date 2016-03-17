@@ -1,4 +1,0 @@
-let [y = 5 +7 ] {
-    justdo  { show 4, show y, showln 6}
-            { 5 :: [] }
-}
