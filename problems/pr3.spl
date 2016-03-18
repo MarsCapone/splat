@@ -4,11 +4,10 @@ function number t3 (list splat) {
     if splat == [] {
         0
     } else {
-        let [v1 = (num (head (split (head splat))))] {
-            let [v2 = (num (head (tail (split (head splat)))))] {
-                let [s = (showln v1 + (v2*3)) ] {
-                    t3 #(tail splat)
-                }
+        let [h = split (head splat)] {
+            let [s = (showln (num (head h)) 
+                        + ((num (head (tail h))) * 3)) ] {
+                t3 #(tail splat)
             }
         }
     }
