@@ -1,0 +1,65 @@
+type token =
+  | NUMBER of (float)
+  | IDENT of (string)
+  | STRING of (string)
+  | BOOLEAN_TYPE
+  | NUMBER_TYPE
+  | STRING_TYPE
+  | STREAM_TYPE
+  | LIST_TYPE
+  | VOID_TYPE
+  | FUNCTION_TYPE
+  | PLUS
+  | MINUS
+  | TIMES
+  | DIVIDE
+  | MODULO
+  | NOT
+  | POWER_OF
+  | OR
+  | AND
+  | JUSTDO
+  | IF
+  | THEN
+  | ELSE
+  | CONS
+  | HEAD
+  | TAIL
+  | EMPTY_LIST
+  | EMPTY_STREAM
+  | AS_NUM
+  | APPLY
+  | TRUE
+  | FALSE
+  | STDIN
+  | EOF
+  | LESS_THAN
+  | LESS_THAN_EQUAL
+  | GREATER_THAN
+  | GREATER_THAN_EQUAL
+  | EQUAL_TO
+  | NOT_EQUAL_TO
+  | SCOPE_BRACE_LEFT
+  | SCOPE_BRACE_RIGHT
+  | EQUALS
+  | PLUS_EQUALS
+  | MINUS_EQUALS
+  | MULTIPLY_EQUALS
+  | DIVIDE_EQUALS
+  | SHOW
+  | SHOWLN
+  | RANGE
+  | SPLIT
+  | SQUARE_BRACE_LEFT
+  | SQUARE_BRACE_RIGHT
+  | LET
+  | SEPARATOR
+  | STRING_WRAPPER
+  | ESCAPE_CHAR
+  | LPAREN
+  | RPAREN
+  | COMMENT_LEFT
+  | COMMENT_RIGHT
+
+val parser_main :
+  (Lexing.lexbuf  -> token) -> Lexing.lexbuf -> Splat.splTerm

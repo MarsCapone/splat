@@ -10,17 +10,14 @@
 /*Operators*/
 %token PLUS MINUS TIMES DIVIDE MODULO NOT POWER_OF OR AND
 %token JUSTDO
-%token FOR FOREVER IN
 %token IF THEN ELSE
-%token WHILE
-%token SWITCH
 %token CONS
 %token HEAD TAIL EMPTY_LIST EMPTY_STREAM AS_NUM
-%token BREAK CONTINUE RETURN APPLY
+%token APPLY
 /*Predefined*/
 %token TRUE FALSE
 %token STDIN
-%token END_OF_STATEMENT EOF
+%token EOF
 /*Comparators*/
 %token LESS_THAN LESS_THAN_EQUAL GREATER_THAN GREATER_THAN_EQUAL EQUAL_TO NOT_EQUAL_TO
 /*Scope*/
@@ -49,7 +46,7 @@
 %left DIVIDE MODULO
 %left TIMES
 %right POWER_OF NOT
-%nonassoc IF THEN ELSE WHILE FOR FOREVER IN JUSTDO
+%nonassoc IF THEN ELSE JUSTDO
 
 %start parser_main             /* the entry point */
 %type <Splat.splTerm> parser_main

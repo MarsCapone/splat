@@ -20,17 +20,9 @@ rule lexer_main = parse
 
 (*Flow*)
     | "justdo"  { JUSTDO }
-    | "forever" { FOREVER }
-    | "for"     { FOR }
-    | "in"     { IN }
     | "if"     { IF }
     | "then"   { THEN }
     | "else"   { ELSE }
-    | "while"  { WHILE }
-    | "switch" { SWITCH }
-    | "break"  { BREAK }
-    | "continue" { CONTINUE }
-    | "return" { RETURN }
     | "let"    { LET }
     | '#'      { APPLY }
 
@@ -38,7 +30,6 @@ rule lexer_main = parse
     | "true"   { TRUE }
     | "false"  { FALSE }
     | "stdin"  { STDIN }
-    | "¬"      { END_OF_STATEMENT }
     | eof      { EOF }
 
 (*Operators*)
