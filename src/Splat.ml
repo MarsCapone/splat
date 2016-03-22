@@ -572,7 +572,8 @@ let rec spl_to_string expr = match expr with
             "Function: "^(type_to_string (typeProg expr))
     | (SplList n) -> list_to_string n
     | (SplPlus (a, b)) -> (spl_to_string a)^" + "^(spl_to_string b)
-
+    (* TODO add all functions here *)
+    | _ -> raise (NonBaseTypeResult "Unrecognised base type")
 
 let print_res res = match res with
     (*| (SplNumber i) -> print_int (int_of_float i) ; print_string " : Number"
@@ -586,4 +587,3 @@ let print_res res = match res with
     (* | (SplApply(e1, e2)) -> print_string "apply"
     | (SplLet(e1, e2, e3)) -> print_string "let" *)*)
     | n -> print_string (spl_to_string res)
-    | _ -> raise (NonBaseTypeResult "Unrecognised base type")
