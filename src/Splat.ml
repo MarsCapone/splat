@@ -14,7 +14,7 @@ type splType =
     SplatNumber
     | SplatBoolean
     | SplatString
-    | SplatList
+    | SplatList of splType
     | SplatFunction of splType * splType
 
 (* Grammar of the language *)
@@ -87,17 +87,17 @@ let rec isValue e = match e with
 let rec type_to_string tT = match tT with
   | SplatNumber -> "Number"
   | SplatBoolean -> "Boolean"
-  | SplatList -> "List"
+  | SplatList(t) -> (type_to_string(t)^" List")
   | SplatString -> "String"
   | SplatFunction(tT1,tT2) -> "( "^type_to_string(tT1)^" -> "^type_to_string(tT2)^" )"
 ;;
 
 let rec print_list = function
-    [] -> print_string "$$"
-    | SplNumber(e) :: l -> print_float e; print_string "; "; print_list l
-    | SplBoolean(b) :: l -> print_string (if b then "true; " else "false; "); print_list l
-    | SplList(a) :: l -> print_string "["; print_list a; print_string "]"; print_list l
-    | SplString(s) :: l -> print_string s; print_string "; "; print_list l
+    [] -> print_string "[]"
+    | SplNumber(e) :: l -> print_float e; print_string "::"; print_list l
+    | SplBoolean(b) :: l -> print_string (if b then "true::" else "false::"); print_list l
+    | SplList(a) :: l -> print_string "("; print_list a; print_string ")"; print_list l
+    | SplString(s) :: l -> print_string s; print_string "::"; print_list l
     | SplAbs(rT, n, tT, x, e) :: l -> print_string "function:";
         print_string (type_to_string tT); print_list l
     | _ -> print_string "null"
@@ -142,7 +142,13 @@ let rec typeOf env e = match e with
     SplNumber (n) -> SplatNumber
     |SplBoolean (b) -> SplatBoolean
     |SplString (s) -> SplatString
-    |SplList (l) -> SplatList
+    |SplList (l) -> (match l with 
+        [] -> SplatList (SplatNumber)
+        | SplNumber(n) :: _ -> SplatList (SplatNumber)
+        | SplBoolean(b) :: _ -> SplatList (SplatBoolean)
+        | SplString(s) :: _ -> SplatList (SplatString)
+        | _ -> raise (TypeError "Invalid types: LIST")
+    )
 
     (*Boolean operators*)
     |SplAnd (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
@@ -224,17 +230,25 @@ let rec typeOf env e = match e with
     )
 
     | SplCons(e1, e2) -> (
-        match (typeOf env e2) with
-            SplatList -> SplatList
-            | b -> raise (TypeError ("Invalid types: "
-                ^type_to_string(typeOf env e1)^" CONS "^type_to_string(b)))
+        match (typeOf env e1), (typeOf env e2) with
+            a, SplatList(n) -> (
+                match a=n with
+                    true -> SplatList(n)
+                    | false -> raise (TypeError ("Invalid types: "
+                ^type_to_string(a)^" CONS "^type_to_string(n))))
+            | _ -> raise (TypeError "Invalid types: CONSTRUCT type and list
+type do not match")
     )
     | SplHead (e1) -> (
-        SplatString (*TODO: Make lists support more than just strings*)
+        match (typeOf env e1) with 
+            SplatList(n) -> n
+            | _ -> raise (TypeError "Invalid type: HEAD parameter is not a
+            list")
     )
+
     | SplTail (e1) -> (
         match (typeOf env e1) with
-            SplatList -> SplatList
+            SplatList(n) -> SplatList(n)
             | a -> raise (TypeError ("Invalid type: TAIL "^type_to_string(a)))
     )
 
@@ -247,7 +261,7 @@ let rec typeOf env e = match e with
 
     | SplEmptyList (e1) -> (
         match (typeOf env e1) with
-            SplatList -> SplatBoolean 
+            SplatList(n) -> SplatBoolean 
             | t -> raise (TypeError ("Invalid type: EMPTYLIST "^type_to_string(t)))
     )
     (*Flow control*)
@@ -319,7 +333,7 @@ let rec typeOf env e = match e with
         SplatNumber -> SplatNumber
         | SplatBoolean -> SplatBoolean
         | SplatString -> SplatString
-        | SplatList -> SplatList
+        | SplatList(n) -> SplatList(n)
         | a -> raise (TypeError ("Invalid type: SHOW "^type_to_string(a)))
     )
 
@@ -327,7 +341,7 @@ let rec typeOf env e = match e with
         SplatNumber -> SplatNumber
         | SplatBoolean -> SplatBoolean
         | SplatString -> SplatString
-        | SplatList -> SplatList
+        | SplatList(n) -> SplatList(n)
         | a -> raise (TypeError ("Invalid type: SHOWLN"^type_to_string(a)))
     )
 
@@ -444,7 +458,8 @@ let rec eval env e = match e with
   | (SplHead(SplList(n))) -> (match n with
         h :: _ when (isValue h) -> (h, env)
         | [] -> (SplList(n), env)
-        | _ -> raise (SyntaxError "Cannot take HEAD of unrecognised expression")
+        | _ -> raise (SyntaxError ("Cannot take HEAD of unrecognised expression
+        "^Pervasives.__LOC__))
   )
   | (SplHead(e1)) -> let (e1', env') = (eval env e1) in (SplHead (e1'), env')
 
@@ -454,13 +469,14 @@ let rec eval env e = match e with
     )
   | (SplTail(e1)) -> let (e1', env') = (eval env e1) in (SplTail(e1'), env')
   
-  | (SplStreamEnd (SplString(e1))) -> (SplBoolean ( if e1 = "eof" then true else
-      false ), env)
-  | (SplStreamEnd (SplNumber(e1))) -> (SplBoolean ( if e1 = Pervasives.nan then
-      true else false), env)
+  | (SplStreamEnd (SplString(e1))) -> (SplBoolean ( e1 = "eof" ), env)
+  | (SplStreamEnd (SplNumber(e1))) -> (SplBoolean ( e1 = Pervasives.nan ), env)
   | (SplStreamEnd (e1)) -> let (e1', env') = (eval env e1) in (SplStreamEnd
         (e1'), env')
 
+  | (SplEmptyList (SplList(e1))) -> (SplBoolean ( e1 = [] ), env)
+  | (SplEmptyList (e1)) -> let (e1', env') = (eval env e1) in 
+        (SplEmptyList(e1'), env')
 
   (*Assignment*)
   | (SplLet(n, m, e3)) when (isValue(m) )-> (e3, addBinding env n m)
@@ -520,8 +536,9 @@ let print_res res = match res with
     | (SplNumber i) -> print_int (int_of_float i) ; print_string " : Number"
     | (SplBoolean b) -> print_string (if b then "true" else "false") ; print_string " : Bool"
     | (SplString s) -> print_string (s^" : String")
-    | (SplAbs(rT,n,tT,x,e)) -> print_string("Function : "^type_to_string( typeProg (res) ))
-    | (SplList l) -> print_string "["; print_list l; print_string "] : List"
+    | (SplAbs(rT,n,tT,x,e)) -> print_string ("Function : "^type_to_string( typeProg (res) ))
+    | (SplList l) -> print_list l; print_string (" : "^type_to_string ( typeProg
+    res ))
     (*Comment up to raise error to stop debugging*)
     (* | (SplApply(e1, e2)) -> print_string "apply"
     | (SplLet(e1, e2, e3)) -> print_string "let" *)

@@ -1,6 +1,6 @@
 <| Task 2 - Copying |>
 
-function number t2 (list splat) {
+function number t2 (number list splat) {
     if splat == [] {
         0
     } else {
