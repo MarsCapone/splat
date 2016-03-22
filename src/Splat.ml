@@ -564,19 +564,19 @@ let evalProg e = evalloop (Env []) e ;;
 
 let rename (s:string) = s^"'";;
 
-let rec spl_to_string expr = match expr with
+
+(*let rec spl_to_string expr = match expr with
     | (SplNumber n) -> string_of_float n
     | (SplBoolean n) -> string_of_bool n
     | (SplString n) -> n
     | (SplAbs (a, b, c, d, e)) -> 
             "Function: "^(type_to_string (typeProg expr))
-    | (SplList n) -> list_to_string n
+    | (SplList n) ->  n
     | (SplPlus (a, b)) -> (spl_to_string a)^" + "^(spl_to_string b)
     (* TODO add all functions here *)
-    | _ -> raise (NonBaseTypeResult "Unrecognised base type")
-
+*)
 let print_res res = match res with
-    (*| (SplNumber i) -> print_int (int_of_float i) ; print_string " : Number"
+    | (SplNumber i) -> print_int (int_of_float i) ; print_string " : Number"
     | (SplBoolean b) -> print_string (if b then "true" else "false") ; print_string " : Bool"
     | (SplString s) -> print_string (s^" : String")
     | (SplAbs(rT,n,tT,x,e)) -> print_string ("Function : "^type_to_string( typeProg (res) ))
@@ -585,5 +585,5 @@ let print_res res = match res with
     | (SplStream s) -> print_string "Some sort of stream here!"
     (*Comment up to raise error to stop debugging*)
     (* | (SplApply(e1, e2)) -> print_string "apply"
-    | (SplLet(e1, e2, e3)) -> print_string "let" *)*)
-    | n -> print_string (spl_to_string res)
+    | (SplLet(e1, e2, e3)) -> print_string "let" *)
+    | _ -> raise (NonBaseTypeResult "Unrecognised base type")
