@@ -5,6 +5,7 @@ exception Terminated ;;
 exception NonBaseTypeResult of string;;
 exception OutOfBounds of string ;;
 exception SyntaxError of string ;;
+exception ConversionError of string ;;
 
 open Printf;;
 
@@ -39,6 +40,7 @@ type splTerm =
     | SplHead of splTerm
     | SplTail of splTerm
     | SplEmptyList of splTerm
+    | SplStreamEnd of splTerm
 (* flow *)
     | SplJustDo of splTerm * splTerm
     | SplFor of splTerm * splTerm * splTerm
@@ -236,6 +238,18 @@ let rec typeOf env e = match e with
             | a -> raise (TypeError ("Invalid type: TAIL "^type_to_string(a)))
     )
 
+    | SplStreamEnd (e1) -> (
+        match (typeOf env e1) with
+            SplatString -> SplatBoolean 
+            | SplatNumber -> SplatBoolean
+            | t -> raise (TypeError ("Invalid type: Stream End can only be String, not "^(type_to_string(t))))
+    )
+
+    | SplEmptyList (e1) -> (
+        match (typeOf env e1) with
+            SplatList -> SplatBoolean 
+            | t -> raise (TypeError ("Invalid type: EMPTYLIST "^type_to_string(t)))
+    )
     (*Flow control*)
     |SplIfElse(e1, e2, e3) -> (
         let ty1 = typeOf env e1 in
@@ -334,6 +348,7 @@ let rec typeOf env e = match e with
 
     | SplJustDo (e1, e2) -> (typeOf env e2)
 
+
     | SplVariable (x) ->  (try lookup env x with
         (LookupError "Variable does not exist in environment") ->
                 raise (TypeError "Expression is not a variable"))
@@ -348,12 +363,13 @@ let rec eval env e = match e with
         (LookupError "Variable does not exist in environment") ->
             raise (UnboundVariableError "Variable does not exist in current
             environment"))
+
   | (SplNumber n) -> raise Terminated
   | (SplBoolean b) -> raise Terminated
   | (SplString s) -> raise Terminated
   | (SplList l) -> raise Terminated
   | (SplAbs(rT, n, tT,x,e')) -> raise Terminated
-
+  
   (*Boolean operators*)
   | (SplAnd(SplBoolean(n),SplBoolean(m))) -> (SplBoolean( n && m ) , env)
   | (SplAnd(SplBoolean(n), e2))      -> let (e2',env') = (eval env e2) in (SplAnd(SplBoolean(n),e2'),env')
@@ -437,6 +453,13 @@ let rec eval env e = match e with
         | [] -> raise (OutOfBounds "At end of list, cannot take tail")
     )
   | (SplTail(e1)) -> let (e1', env') = (eval env e1) in (SplTail(e1'), env')
+  
+  | (SplStreamEnd (SplString(e1))) -> (SplBoolean ( if e1 = "eof" then true else
+      false ), env)
+  | (SplStreamEnd (SplNumber(e1))) -> (SplBoolean ( if e1 = Pervasives.nan then
+      true else false), env)
+  | (SplStreamEnd (e1)) -> let (e1', env') = (eval env e1) in (SplStreamEnd
+        (e1'), env')
 
 
   (*Assignment*)
@@ -468,7 +491,7 @@ let rec eval env e = match e with
       (print_list n; print_string "\n") in (SplList n)), env)
   | (SplShowLn(SplString(n))) -> ((let p =
       (print_string n; print_string "\n") in (SplString n)), env)
-  | (SplShowLn(e1)) -> let (e1', env') = (eval env e1) in SplShowLn(e1'),env'
+  | (SplShowLn(e1)) -> let (e1', env') = (eval env e1) in (SplShowLn(e1'),env')
 
   | (SplJustDo(e1, e2)) -> (
         let p,_ = (eval env e1) in
@@ -478,11 +501,13 @@ let rec eval env e = match e with
   | (SplSplit(SplString(s)))    -> ((split s), env)
   | (SplSplit(s))               -> let (s', env') = (eval env s) in (SplSplit(s'), env')
 
-  | (SplAsNum(SplString(s)))    -> (SplNumber(float_of_string s), env)
+  | (SplAsNum(SplString(s)))    -> (match (String.lowercase s) with 
+        "eof" -> (SplNumber(Pervasives.nan), env)
+        | _ -> (SplNumber (float_of_string s), env)
+  )
   | (SplAsNum(s))               -> let (s', env') = (eval env s) in (SplAsNum(s'), env')
 
   | _ -> raise Terminated ;;
-
 
 let rec evalloop env e = try (let (e',env') = (eval env e) in (evalloop env'
 e')) with Terminated -> if (isValue e) then e else
@@ -494,7 +519,7 @@ let rename (s:string) = s^"'";;
 let print_res res = match res with
     | (SplNumber i) -> print_int (int_of_float i) ; print_string " : Number"
     | (SplBoolean b) -> print_string (if b then "true" else "false") ; print_string " : Bool"
-    | (SplString s) -> print_string s
+    | (SplString s) -> print_string (s^" : String")
     | (SplAbs(rT,n,tT,x,e)) -> print_string("Function : "^type_to_string( typeProg (res) ))
     | (SplList l) -> print_string "["; print_list l; print_string "] : List"
     (*Comment up to raise error to stop debugging*)

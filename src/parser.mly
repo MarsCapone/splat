@@ -16,7 +16,7 @@
 %token APPLY
 /*Predefined*/
 %token TRUE FALSE
-%token STDIN
+%token STDIN STDIN_STREAMLINE STREAM_END LIST_END 
 %token EOF
 /*Comparators*/
 %token LESS_THAN LESS_THAN_EQUAL GREATER_THAN GREATER_THAN_EQUAL EQUAL_TO NOT_EQUAL_TO
@@ -36,6 +36,7 @@
 %left SEPARATOR           /*Lowest precedence*/
 %right CONS
 %right HEAD TAIL AS_NUM SHOW
+%left STREAM_END LIST_END
 %left APPLY
 %right EQUALS PLUS_EQUALS MINUS_EQUALS MULTIPLY_EQUALS DIVIDE_EQUALS
 %left OR
@@ -114,6 +115,10 @@ expr:
             with End_of_file -> [] in
         readlines Pervasives.stdin ) }
 
+    | STDIN_STREAMLINE              { SplString (
+        try input_line Pervasives.stdin with End_of_file -> "eof" ) }
+    | STREAM_END expr               { SplStreamEnd $2 }
+    | LIST_END expr                 { SplEmptyList $2 }
     | SPLIT expr                    { SplSplit $2 }
     | AS_NUM expr                   { SplAsNum $2 }
 

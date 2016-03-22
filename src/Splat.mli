@@ -29,6 +29,7 @@ type splTerm =
     | SplHead of splTerm
     | SplTail of splTerm
     | SplEmptyList of splTerm
+    | SplStreamEnd of splTerm
 (* flow *)
     | SplJustDo of splTerm * splTerm
     | SplFor of splTerm * splTerm * splTerm
