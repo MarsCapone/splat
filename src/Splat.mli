@@ -3,6 +3,7 @@ type splType =
     SplatNumber
     | SplatBoolean
     | SplatString
+    | SplatStream
     | SplatList of splType
     | SplatFunction of splType * splType
 
@@ -12,6 +13,7 @@ type splTerm =
     | SplBoolean of bool
     | SplString of string
     | SplList of splTerm list
+    | SplStream of string Stream.t
     | SplVariable of string
 (* number operators *)
     | SplPlus of splTerm * splTerm

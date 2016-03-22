@@ -30,6 +30,7 @@ rule lexer_main = parse
     | "true"   { TRUE }
     | "false"  { FALSE }
     | "stdin"  { STDIN }
+    | "strin"  { STREAMIN }
     | "nextln" { STDIN_STREAMLINE }
     | "strend" { STREAM_END }
     | "lstend" { LIST_END }
