@@ -3,7 +3,7 @@ type splType =
     SplatNumber
     | SplatBoolean
     | SplatString
-    | SplatList
+    | SplatList of splType
     | SplatFunction of splType * splType
 
 (* Grammar of the language *)

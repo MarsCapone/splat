@@ -1,6 +1,6 @@
 <| Task 4 - Accumulator |>
 
-function number t4 (list splat) {
+function number t4 (number list splat) {
     function number i (number acc) {
         if splat == [] {
             0

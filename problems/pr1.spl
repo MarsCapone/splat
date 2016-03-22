@@ -1,7 +1,7 @@
 <| Task 1 - Prints the input with one at start |>
 
 let [zero = showln 0] {
-    function number t1 (list splat) {
+    function number t1 (number list splat) {
         if splat == [] {
             0
         } else {

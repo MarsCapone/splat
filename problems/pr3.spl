@@ -1,6 +1,6 @@
 <| Task 3 - Stream arithmetic |>
 
-function number t3 (list splat) {
+function number t3 (number list splat) {
     if splat == [] {
         0
     } else {
