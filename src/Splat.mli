@@ -33,12 +33,7 @@ type splTerm =
     | SplEmptyList of splTerm
     | SplStreamEnd of splTerm
 (* flow *)
-    | SplJustDo of splTerm * splTerm
-    | SplFor of splTerm * splTerm * splTerm
-    | SplForever of splTerm
-    | SplWhile of splTerm * splTerm
-    | SplIfElse of splTerm * splTerm * splTerm
-    | SplSwitch of splTerm * splTerm
+    | SplIfElse of splTerm * splTerm list * splTerm list
 (* comparators *)
     | SplLt of splTerm * splTerm
     | SplGt of splTerm * splTerm
@@ -52,7 +47,7 @@ type splTerm =
     | SplMinusAssign of string * splTerm
     | SplTimesAssign of string * splTerm
     | SplDivideAssign of string * splTerm
-    | SplLet of string * splTerm * splTerm
+    | SplLet of string * splTerm * splTerm list
 (* predefined functions *)
     | SplShow of splTerm
     | SplShowLn of splTerm
@@ -62,7 +57,7 @@ type splTerm =
 
 (*Function stuff*)
     | SplApply of splTerm * splTerm
-    | SplAbs of splType * string * splType * string * splTerm
+    | SplAbs of splType * string * splType * string * splTerm list
 
 val typeProg : splTerm -> splType
 val evalProg :  splTerm -> splTerm

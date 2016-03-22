@@ -6,6 +6,7 @@ exception NonBaseTypeResult of string;;
 exception OutOfBounds of string ;;
 exception SyntaxError of string ;;
 exception ConversionError of string ;;
+exception FunctionError of string ;;
 
 open Printf;;
 
@@ -44,12 +45,7 @@ type splTerm =
     | SplEmptyList of splTerm
     | SplStreamEnd of splTerm
 (* flow *)
-    | SplJustDo of splTerm * splTerm
-    | SplFor of splTerm * splTerm * splTerm
-    | SplForever of splTerm
-    | SplWhile of splTerm * splTerm
-    | SplIfElse of splTerm * splTerm * splTerm
-    | SplSwitch of splTerm * splTerm
+    | SplIfElse of splTerm * splTerm list * splTerm list
 (* comparators *)
     | SplLt of splTerm * splTerm
     | SplGt of splTerm * splTerm
@@ -63,7 +59,7 @@ type splTerm =
     | SplMinusAssign of string * splTerm
     | SplTimesAssign of string * splTerm
     | SplDivideAssign of string * splTerm
-    | SplLet of string * splTerm * splTerm
+    | SplLet of string * splTerm * splTerm list
 (* predefined functions *)
     | SplShow of splTerm
     | SplShowLn of splTerm
@@ -73,7 +69,7 @@ type splTerm =
 
 (*Function stuff*)
     | SplApply of splTerm * splTerm
-    | SplAbs of splType * string * splType * string * splTerm
+    | SplAbs of splType * string * splType * string * splTerm list
 
 exception StuckTerm of splTerm;;
 
@@ -247,8 +243,8 @@ type do not match")
     | SplHead (e1) -> (
         match (typeOf env e1) with 
             SplatList(n) -> n
-            | _ -> raise (TypeError "Invalid type: HEAD parameter is not a
-            list")
+            | _ -> raise (TypeError "Invalid type: HEAD parameter is
+            not a list")
     )
 
     | SplTail (e1) -> (
@@ -274,8 +270,10 @@ type do not match")
         let ty1 = typeOf env e1 in
             match ty1 with
                 SplatBoolean -> (
-                    let ty1 = typeOf env e2 in
-                    let ty2 = typeOf env e3 in
+                    let ty1 = typeOf env 
+                        (List.nth e2 ((List.length e2)-1)) in
+                    let ty2 = typeOf env 
+                        (List.nth e3 ((List.length e3)-1)) in
                     (match (ty1=ty2) with
                         true -> ty1
                         | false -> (
@@ -299,7 +297,8 @@ type do not match")
 
     |SplLet(e1, e2, e3) -> (
         let (env') = (addBinding env e1 (typeOf env e2)) in
-            (typeOf env' e3)
+            (typeOf env' 
+                (List.nth e3 ((List.length e3)-1)))
     )
 
     |SplApply(e1, e2) -> (
@@ -326,7 +325,8 @@ type do not match")
 
     |SplAbs (rT, n, tT, x, e) ->  (
         let env' = (addBinding (addBinding env n (SplatFunction(tT, rT))) x tT ) in
-        let ty1 = typeOf env' e in
+        let ty1 = typeOf env' 
+            (List.nth e ((List.length e)-1)) in
         (
             match ty1 with
                 SplatFunction(p, r) -> SplatFunction(tT, SplatFunction(p, r))
@@ -365,9 +365,6 @@ type do not match")
             | _ -> raise (TypeError ("Invalid type: NUM cannot operate on "^(type_to_string(ty1))))
     )
 
-    | SplJustDo (e1, e2) -> (typeOf env e2)
-
-
     | SplVariable (x) ->  (try lookup env x with
         (LookupError "Variable does not exist in environment") ->
                 raise (TypeError "Expression is not a variable"))
@@ -383,10 +380,11 @@ let rec eval env e = match e with
             raise (UnboundVariableError "Variable does not exist in current
             environment"))
 
-  | (SplNumber n) -> raise Terminated
-  | (SplBoolean b) -> raise Terminated
-  | (SplString s) -> raise Terminated
-  | (SplList l) -> raise Terminated
+  | (SplNumber (n)) -> raise Terminated
+  | (SplBoolean (b)) -> raise Terminated
+  | (SplString (s)) -> raise Terminated
+  | (SplList (l)) -> raise Terminated
+  | (SplStream (s)) -> raise Terminated 
   | (SplAbs(rT, n, tT,x,e')) -> raise Terminated
   
   (*Boolean operators*)
@@ -453,7 +451,9 @@ let rec eval env e = match e with
   | (SplPower(e1, e2))            -> let (e1',env') = (eval env e1) in (SplPower(e1', e2) ,env')
 
   (*Flow*)
-  | (SplIfElse(SplBoolean(n), e2, e3)) -> ((if n then e2 else e3), env)
+  | (SplIfElse(SplBoolean(n), e2, e3)) -> (
+      if n then (eval_seq env e2) else (eval_seq env e3)
+  )
   | (SplIfElse(e1, e2, e3))            -> let (e1',env') = (eval env e1) in (SplIfElse(e1', e2, e3) ,env')
 
   | (SplCons(n, SplList(m))) when (isValue(n))  -> (SplList( n :: m ), env)
@@ -484,40 +484,43 @@ let rec eval env e = match e with
         (SplEmptyList(e1'), env')
 
   (*Assignment*)
-  | (SplLet(n, m, e3)) when (isValue(m) )-> (e3, addBinding env n m)
+  | (SplLet(n, m, e3)) when (isValue(m)) -> 
+          (eval_seq (addBinding env n m) e3)
   | (SplLet(n, m, e3)) -> let (m', env') = (eval env m) in (SplLet(n, m', e3), env')
 
-  | (SplApply(SplAbs(rT,n,tT,x,e), e2)) when (isValue(e2)) -> (e, addBinding (addBinding env n (SplAbs(rT,n,tT,x,e))) x e2)
+  | (SplApply(SplAbs(rT,n,tT,x,e), e2)) when (isValue(e2)) -> 
+          (eval_seq 
+            (addBinding 
+                (addBinding env n (SplAbs(rT,n,tT,x,e))) 
+                x 
+                e2)
+            e)
   | (SplApply(SplAbs(rT,n,tT,x,e), e2))                    -> let (e2',env') = (eval env e2) in (SplApply( SplAbs(rT,n,tT,x,e) , e2') , env')
   | (SplApply(e1,e2))                                -> let (e1',env') = (eval env e1) in (SplApply(e1',e2), env')
 
   (*Predefined functions*)
-  | (SplShow(SplNumber n)) -> ((let p =
+  | (SplShow(SplNumber n)) -> ((let () =
       (print_int (int_of_float n); print_string " ") in SplNumber(n)), env)
-  | (SplShow(SplBoolean n)) -> ((let p =
+  | (SplShow(SplBoolean n)) -> ((let () =
       (print_string (if n then "true " else "false ")) in
         SplBoolean(n)), env)
-  | (SplShow(SplList(n))) -> ((let p =
+  | (SplShow(SplList(n))) -> ((let () =
       (print_list n; print_string " ") in (SplList n)), env)
-  | (SplShow(SplString(n))) -> ((let p =
+  | (SplShow(SplString(n))) -> ((let () =
       (print_string n; print_string " ") in (SplString n)), env)
   | (SplShow(e1)) -> let (e1', env') = (eval env e1) in (SplShow(e1'), env')
 
-  | (SplShowLn(SplNumber n)) -> ((let p =
+  | (SplShowLn(SplNumber n)) -> ((let () =
       (print_int (int_of_float n); print_string "\n") in SplNumber(n)), env)
-  | (SplShowLn(SplBoolean n)) -> ((let p =
+  | (SplShowLn(SplBoolean n)) -> ((let () =
       (print_string (if n then "true\n" else "false\n")) in
         SplBoolean(n)), env)
-  | (SplShowLn(SplList(n))) -> ((let p =
+  | (SplShowLn(SplList(n))) -> ((let () =
       (print_list n; print_string "\n") in (SplList n)), env)
-  | (SplShowLn(SplString(n))) -> ((let p =
+  | (SplShowLn(SplString(n))) -> ((let () =
       (print_string n; print_string "\n") in (SplString n)), env)
   | (SplShowLn(e1)) -> let (e1', env') = (eval env e1) in (SplShowLn(e1'),env')
 
-  | (SplJustDo(e1, e2)) -> (
-        let p,_ = (eval env e1) in
-            (eval env e2)
-    )
 
   | (SplSplit(SplString(s)))    -> ((split s), env)
   | (SplSplit(s))               -> let (s', env') = (eval env s) in (SplSplit(s'), env')
@@ -528,14 +531,28 @@ let rec eval env e = match e with
   )
   | (SplAsNum(s))               -> let (s', env') = (eval env s) in (SplAsNum(s'), env')
 
-  | _ -> raise Terminated ;;
+  | ex -> raise Terminated 
 
-let rec evalloop env e = try (let (e',env') = (eval env e) in (evalloop env'
-e')) with Terminated -> if (isValue e) then e else
-    raise (StuckTerm e) ;;
+
+and eval_seq env n = match n with
+    (*[] -> raise (FunctionError "The function has no body "
+        ^Pervasives.__LOC__)*)
+    expr :: [] -> let (expr', env') = (eval env expr) in 
+        (expr', env')
+    | expr :: expr_lst -> (
+        let _ = (eval env expr) in ();
+        (eval_seq env expr_lst)
+    )
+    | x -> raise (FunctionError "No function body")
+;;
+
+let rec evalloop env e = try (let (e',env') = (eval env e) in 
+    (evalloop env' e')) with Terminated -> 
+        if (isValue e) then e else e (*raise (StuckTerm e)*) ;;
 let evalProg e = evalloop (Env []) e ;;
 
 let rename (s:string) = s^"'";;
+
 
 let print_res res = match res with
     | (SplNumber i) -> print_int (int_of_float i) ; print_string " : Number"
