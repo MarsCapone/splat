@@ -19,7 +19,6 @@ rule lexer_main = parse
     | "function"  { FUNCTION_TYPE }
 
 (*Flow*)
-    | "justdo"  { JUSTDO }
     | "if"     { IF }
     | "then"   { THEN }
     | "else"   { ELSE }
@@ -83,7 +82,9 @@ rule lexer_main = parse
     | ']'     { SQUARE_BRACE_RIGHT }
     | '('     { LPAREN }
     | ')'     { RPAREN }
-    | ','     { SEPARATOR }
+    | ','     { COMMA }
+    | '@'     { AT }
+    | ';'     { SEPARATOR }
     | '"'     { STRING_WRAPPER }
     | '\\'    { ESCAPE_CHAR }
 

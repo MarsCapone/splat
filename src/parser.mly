@@ -9,7 +9,6 @@
 %token BOOLEAN_TYPE NUMBER_TYPE STRING_TYPE STREAM_TYPE LIST_TYPE VOID_TYPE FUNCTION_TYPE
 /*Operators*/
 %token PLUS MINUS TIMES DIVIDE MODULO NOT POWER_OF OR AND
-%token JUSTDO
 %token IF THEN ELSE
 %token CONS
 %token HEAD TAIL EMPTY_LIST EMPTY_STREAM AS_NUM
@@ -17,7 +16,7 @@
 /*Predefined*/
 %token TRUE FALSE
 %token STDIN STREAMIN STDIN_STREAMLINE STREAM_END LIST_END 
-%token EOF
+%token EOF EOL COMMA AT
 /*Comparators*/
 %token LESS_THAN LESS_THAN_EQUAL GREATER_THAN GREATER_THAN_EQUAL EQUAL_TO NOT_EQUAL_TO
 /*Scope*/
@@ -33,9 +32,10 @@
 %token ESCAPE_CHAR
 %token LPAREN RPAREN COMMENT_LEFT COMMENT_RIGHT
 /*Associativity and precedence*/
-%left SEPARATOR           /*Lowest precedence*/
+%left COMMA AT       /*Lowest precedence*/
 %right CONS
 %right HEAD TAIL AS_NUM SHOW
+%left STREAM_END LIST_END
 %left APPLY
 %right EQUALS PLUS_EQUALS MINUS_EQUALS MULTIPLY_EQUALS DIVIDE_EQUALS
 %left OR
@@ -65,7 +65,8 @@ type_spec:
 ;
 
 expr:
-    | LET SQUARE_BRACE_LEFT IDENT EQUALS expr SQUARE_BRACE_RIGHT SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT { SplLet ($3, $5, $8) }
+    | LET SQUARE_BRACE_LEFT IDENT EQUALS expr SQUARE_BRACE_RIGHT
+    SCOPE_BRACE_LEFT expr_seq SCOPE_BRACE_RIGHT { SplLet ($3, $5, $8) }
 
     | NUMBER                        { SplNumber $1 }
     | IDENT                         { SplVariable $1 }
@@ -73,7 +74,8 @@ expr:
     | STRING_WRAPPER STRING STRING_WRAPPER { SplString $2 }
 
     | expr APPLY expr               { SplApply ($1, $3) }
-    | FUNCTION_TYPE type_spec IDENT LPAREN type_spec IDENT RPAREN SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT { SplAbs ($2, $3, $5, $6, $9) }
+    | FUNCTION_TYPE type_spec IDENT LPAREN type_spec IDENT RPAREN
+    SCOPE_BRACE_LEFT expr_seq SCOPE_BRACE_RIGHT { SplAbs ($2, $3, $5, $6, $9) }
     | LPAREN expr RPAREN            { $2 }
 
     /*Booleans*/
@@ -100,7 +102,8 @@ expr:
     | expr EQUAL_TO expr              { SplEq ($1, $3) }
 
     /*Flow control*/
-    | IF expr SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT ELSE SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT      { SplIfElse ($2, $4, $8) }
+    | IF expr SCOPE_BRACE_LEFT expr_seq SCOPE_BRACE_RIGHT ELSE
+    SCOPE_BRACE_LEFT expr_seq SCOPE_BRACE_RIGHT      { SplIfElse ($2, $4, $8) }
 
     /*Stream / List Operations*/
     | expr CONS expr                { SplCons ($1, $3) }
@@ -130,11 +133,11 @@ expr:
     /*Predefined functions*/
     | SHOWLN expr                   { SplShowLn $2 }
     | SHOW expr                     { SplShow $2 }
-    | JUSTDO SCOPE_BRACE_LEFT justdo_expr SCOPE_BRACE_RIGHT
-        SCOPE_BRACE_LEFT expr SCOPE_BRACE_RIGHT  { SplJustDo ($3, $6) }
 ;
 
-justdo_expr:
-    expr SEPARATOR justdo_expr      { SplJustDo ($1, $3) }
-    | expr                          { $1 }
+expr_seq:
+    SEPARATOR expr_seq            { $2 }
+    | expr SEPARATOR expr_seq     { $1 :: $3 }
+    | expr                        { [$1] }
+    |                             { [] }
 ;

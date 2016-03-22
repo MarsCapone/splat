@@ -5,6 +5,8 @@ exception Terminated ;;
 exception NonBaseTypeResult of string;;
 exception OutOfBounds of string ;;
 exception SyntaxError of string ;;
+exception ConversionError of string ;;
+exception FunctionError of string ;;
 
 open Printf;;
 
@@ -43,8 +45,7 @@ type splTerm =
     | SplEmptyList of splTerm
     | SplStreamEnd of splTerm
 (* flow *)
-    | SplJustDo of splTerm * splTerm
-    | SplIfElse of splTerm * splTerm * splTerm
+    | SplIfElse of splTerm * splTerm list * splTerm list
 (* comparators *)
     | SplLt of splTerm * splTerm
     | SplGt of splTerm * splTerm
@@ -58,7 +59,7 @@ type splTerm =
     | SplMinusAssign of string * splTerm
     | SplTimesAssign of string * splTerm
     | SplDivideAssign of string * splTerm
-    | SplLet of string * splTerm * splTerm
+    | SplLet of string * splTerm * splTerm list
 (* predefined functions *)
     | SplShow of splTerm
     | SplShowLn of splTerm
@@ -68,24 +69,24 @@ type splTerm =
 
 (*Function stuff*)
     | SplApply of splTerm * splTerm
-    | SplAbs of splType * string * splType * string * splTerm
+    | SplAbs of splType * string * splType * string * splTerm list
 
 exception StuckTerm of splTerm;;
 
 let rec isValue e = match e with
-    | SplNumber(n) -> true
-    | SplBoolean(b) -> true
-    | SplString(s) -> true
-    | SplList(l) -> true
-    | SplStream(s) -> true
-    | SplAbs(rT, n, tT,x,e') -> true
+    | (SplNumber n) -> true
+    | (SplBoolean b) -> true
+    | (SplString s) -> true
+    | (SplList l) -> true
+    | (SplStream s) -> true
+    | (SplAbs (rT, n, tT,x,e')) -> true
     | _ -> false
 ;;
 
 let rec type_to_string tT = match tT with
   | SplatNumber -> "Number"
   | SplatBoolean -> "Boolean"
-  | SplatList(t) -> (type_to_string(t)^" List")
+  | SplatList(t) -> ("List of "^type_to_string(t))
   | SplatStream -> "Stream"
   | SplatString -> "String"
   | SplatFunction(tT1,tT2) -> "( "^type_to_string(tT1)^" -> "^type_to_string(tT2)^" )"
@@ -128,6 +129,12 @@ let rec lookup env str = match env with
             true -> thing
            |false -> lookup (Env (gs)) str
 	)
+;;
+
+let rec last = function
+    | x :: [] -> x
+    | _ :: xs -> last xs
+    | [] -> raise (OutOfBounds "List is empty")
 ;;
 
 (* Function to add an extra entry in to an environment *)
@@ -242,8 +249,7 @@ type do not match")
     | SplHead (e1) -> (
         match (typeOf env e1) with 
             SplatList(n) -> n
-            | _ -> raise (TypeError "Invalid type: HEAD parameter is not a
-            list")
+            | _ -> raise (TypeError "Invalid type: HEAD parameter is not a list")
     )
 
     | SplTail (e1) -> (
@@ -270,8 +276,8 @@ type do not match")
         let ty1 = typeOf env e1 in
             match ty1 with
                 SplatBoolean -> (
-                    let ty1 = typeOf env e2 in
-                    let ty2 = typeOf env e3 in
+                    let ty1 = typeOf env (last e2) in
+                    let ty2 = typeOf env (last e3) in
                     (match (ty1=ty2) with
                         true -> ty1
                         | false -> (
@@ -295,7 +301,7 @@ type do not match")
 
     |SplLet(e1, e2, e3) -> (
         let (env') = (addBinding env e1 (typeOf env e2)) in
-            (typeOf env' e3)
+            (typeOf env' (last e3))
     )
 
     |SplApply(e1, e2) -> (
@@ -322,7 +328,7 @@ type do not match")
 
     |SplAbs (rT, n, tT, x, e) ->  (
         let env' = (addBinding (addBinding env n (SplatFunction(tT, rT))) x tT ) in
-        let ty1 = typeOf env' e in
+        let ty1 = typeOf env' (last e) in
         (
             match ty1 with
                 SplatFunction(p, r) -> SplatFunction(tT, SplatFunction(p, r))
@@ -361,8 +367,6 @@ type do not match")
             | _ -> raise (TypeError ("Invalid type: NUM cannot operate on "^(type_to_string(ty1))))
     )
 
-    | SplJustDo (e1, e2) -> (typeOf env e2)
-
     | SplVariable (x) ->  (try lookup env x with
         (LookupError "Variable does not exist in environment") ->
                 raise (TypeError "Expression is not a variable"))
@@ -372,17 +376,30 @@ type do not match")
 
 let typeProg e = typeOf (Env []) e ;;
 
+let rec list_to_string = function
+    (SplString n) :: [] -> n
+    | (SplNumber n) :: [] -> string_of_float n
+    | (SplIfElse (a, b, c)) :: [] -> "ifelse"
+    | (SplLet (a, b, c)) :: [] -> "let"
+    | (SplAbs (a, b, c, d, e)) :: [] -> "function"
+    | (SplApply (a, b)) :: [] -> "apply"
+    | (SplShowLn n) :: xs -> "showln ; "^(list_to_string xs)
+    | _ -> "_"
+;;
+
 let rec eval env e = match e with
-  | (SplVariable (x)) -> (try ((lookup env x) , env) with
+  | (SplVariable x) -> (try ((lookup env x) , env) with
         (LookupError "Variable does not exist in environment") ->
             raise (UnboundVariableError "Variable does not exist in current
             environment"))
+
   | (SplNumber n) -> raise Terminated
   | (SplBoolean b) -> raise Terminated
   | (SplString s) -> raise Terminated
   | (SplList l) -> raise Terminated
-  | (SplAbs(rT, n, tT,x,e')) -> raise Terminated
-
+  | (SplStream s) -> raise Terminated 
+  | (SplAbs (rT, n, tT,x,e')) -> raise Terminated
+  
   (*Boolean operators*)
   | (SplAnd(SplBoolean(n),SplBoolean(m))) -> (SplBoolean( n && m ) , env)
   | (SplAnd(SplBoolean(n), e2))      -> let (e2',env') = (eval env e2) in (SplAnd(SplBoolean(n),e2'),env')
@@ -447,7 +464,9 @@ let rec eval env e = match e with
   | (SplPower(e1, e2))            -> let (e1',env') = (eval env e1) in (SplPower(e1', e2) ,env')
 
   (*Flow*)
-  | (SplIfElse(SplBoolean(n), e2, e3)) -> ((if n then e2 else e3), env)
+  | (SplIfElse(SplBoolean(n), e2, e3)) -> (
+      if n then (eval_seq env e2) else (eval_seq env e3)
+  )
   | (SplIfElse(e1, e2, e3))            -> let (e1',env') = (eval env e1) in (SplIfElse(e1', e2, e3) ,env')
 
   | (SplCons(n, SplList(m))) when (isValue(n))  -> (SplList( n :: m ), env)
@@ -478,12 +497,19 @@ let rec eval env e = match e with
         (SplEmptyList(e1'), env')
 
   (*Assignment*)
-  | (SplLet(n, m, e3)) when (isValue(m) )-> (e3, addBinding env n m)
+  | (SplLet(n, m, e3)) when (isValue(m)) -> 
+          (eval_seq (addBinding env n m) e3)
   | (SplLet(n, m, e3)) -> let (m', env') = (eval env m) in (SplLet(n, m', e3), env')
 
-  | (SplApply(SplAbs(rT,n,tT,x,e), e2)) when (isValue(e2)) -> (e, addBinding (addBinding env n (SplAbs(rT,n,tT,x,e))) x e2)
-  | (SplApply(SplAbs(rT,n,tT,x,e), e2))                    -> let (e2',env') = (eval env e2) in (SplApply( SplAbs(rT,n,tT,x,e) , e2') , env')
-  | (SplApply(e1,e2))                                -> let (e1',env') = (eval env e1) in (SplApply(e1',e2), env')
+  | (SplApply(SplAbs(rT,n,tT,x,e), e2)) when (isValue (e2)) -> (
+      let env' = (addBinding 
+        (addBinding env n (SplAbs(rT,n,tT,x,e))) x e2) in 
+      (eval_seq env' e)
+  )
+  | (SplApply(SplAbs(rT, n, tT, x, e), e2)) ->
+          let (e2', env') = (eval env e2) in 
+          (SplApply(SplAbs(rT, n, tT, x, e), e2'), env)
+  | (SplApply(e1,e2)) -> let (e1',env') = (eval env e1) in (SplApply(e1',e2), env')
 
   (*Predefined functions*)
   | (SplShow(SplNumber n)) -> ((let () =
@@ -506,36 +532,50 @@ let rec eval env e = match e with
       (print_list n; print_string "\n") in (SplList n)), env)
   | (SplShowLn(SplString(n))) -> ((let () =
       (print_string n; print_string "\n") in (SplString n)), env)
-  | (SplShowLn(e1)) -> let (e1', env') = (eval env e1) in
-  (SplShowLn(e1'),env')
+  | (SplShowLn(e1)) -> let (e1', env') = (eval env e1) in (SplShowLn(e1'),env)
 
-  | (SplJustDo(e1, e2)) when (isValue(e2)) -> (
-        let _ = (eval env e1) in
-            (e2, env)
-    )
-  | (SplJustDo(e1, e2)) -> (
-      let _ = (eval env e1) in 
-        (eval env e2)
-  )
 
   | (SplSplit(SplString(s)))    -> ((split s), env)
   | (SplSplit(s))               -> let (s', env') = (eval env s) in (SplSplit(s'), env')
 
-  | (SplAsNum(SplString(s)))    -> (SplNumber(float_of_string s), env)
+  | (SplAsNum(SplString(s)))    -> (match (String.lowercase s) with 
+        "eof" -> (SplNumber(Pervasives.nan), env)
+        | _ -> (SplNumber (float_of_string s), env)
+  )
   | (SplAsNum(s))               -> let (s', env') = (eval env s) in (SplAsNum(s'), env')
 
-  | _ -> raise Terminated ;;
+  | ex -> raise Terminated 
 
 
-let rec evalloop env e = try (let (e',env') = (eval env e) in (evalloop env'
-e')) with Terminated -> if (isValue e) then e else
-    raise (StuckTerm e) ;;
+and eval_seq env n = match n with
+    | expr :: [] -> 
+        (if (isValue expr) then (expr, env) else (eval env expr)) 
+    | expr :: expr_lst -> (
+        let _ = (eval env expr) in ();
+        (eval_seq env expr_lst)
+    )
+    | x -> raise (FunctionError "No function body")
+;;
+
+let rec evalloop env e = try (let (e',env') = (eval env e) in 
+    (evalloop env' e')) with Terminated -> 
+        if (isValue e) then e else e (*raise (StuckTerm e)*) ;;
 let evalProg e = evalloop (Env []) e ;;
 
 let rename (s:string) = s^"'";;
 
+let rec spl_to_string expr = match expr with
+    | (SplNumber n) -> string_of_float n
+    | (SplBoolean n) -> string_of_bool n
+    | (SplString n) -> n
+    | (SplAbs (a, b, c, d, e)) -> 
+            "Function: "^(type_to_string (typeProg expr))
+    | (SplList n) -> list_to_string n
+    | (SplPlus (a, b)) -> (spl_to_string a)^" + "^(spl_to_string b)
+
+
 let print_res res = match res with
-    | (SplNumber i) -> print_int (int_of_float i) ; print_string " : Number"
+    (*| (SplNumber i) -> print_int (int_of_float i) ; print_string " : Number"
     | (SplBoolean b) -> print_string (if b then "true" else "false") ; print_string " : Bool"
     | (SplString s) -> print_string (s^" : String")
     | (SplAbs(rT,n,tT,x,e)) -> print_string ("Function : "^type_to_string( typeProg (res) ))
@@ -544,5 +584,6 @@ let print_res res = match res with
     | (SplStream s) -> print_string "Some sort of stream here!"
     (*Comment up to raise error to stop debugging*)
     (* | (SplApply(e1, e2)) -> print_string "apply"
-    | (SplLet(e1, e2, e3)) -> print_string "let" *)
+    | (SplLet(e1, e2, e3)) -> print_string "let" *)*)
+    | n -> print_string (spl_to_string res)
     | _ -> raise (NonBaseTypeResult "Unrecognised base type")
