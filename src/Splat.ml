@@ -509,10 +509,14 @@ let rec eval env e = match e with
   | (SplShowLn(e1)) -> let (e1', env') = (eval env e1) in
   (SplShowLn(e1'),env')
 
-  | (SplJustDo(e1, e2)) -> (
-        let p,_ = (eval env e1) in
-            (eval env e2)
+  | (SplJustDo(e1, e2)) when (isValue(e2)) -> (
+        let _ = (eval env e1) in
+            (e2, env)
     )
+  | (SplJustDo(e1, e2)) -> (
+      let _ = (eval env e1) in 
+        (eval env e2)
+  )
 
   | (SplSplit(SplString(s)))    -> ((split s), env)
   | (SplSplit(s))               -> let (s', env') = (eval env s) in (SplSplit(s'), env')
