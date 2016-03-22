@@ -6,18 +6,8 @@ open Printf
 
 let parseProgram c =
     let lexbuf = Lexing.from_channel c in
-        try 
-            parser_main lexer_main lexbuf
-        with Parsing.Parse_error -> 
-            begin
-                let curr = lexbuf.lex_curr_p in
-                let line = string_of_int curr.pos_lnum in
-                let cnum = string_of_int curr.pos_cnum in
-                let bol = string_of_int curr.pos_bol in
-                    failwith ("Parse error: Line:"
-                        ^line^", CNum:"
-                        ^cnum^", Bol:"^bol)
-            end;;
+        parser_main lexer_main lexbuf
+;;
 
 (* Parsing.set_trace true; *)
 let arg = ref stdin in

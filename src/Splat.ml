@@ -448,27 +448,28 @@ let rec eval env e = match e with
   | (SplApply(e1,e2))                                -> let (e1',env') = (eval env e1) in (SplApply(e1',e2), env')
 
   (*Predefined functions*)
-  | (SplShow(SplNumber n)) -> ((let p =
+  | (SplShow(SplNumber n)) -> ((let () =
       (print_int (int_of_float n); print_string " ") in SplNumber(n)), env)
-  | (SplShow(SplBoolean n)) -> ((let p =
+  | (SplShow(SplBoolean n)) -> ((let () =
       (print_string (if n then "true " else "false ")) in
         SplBoolean(n)), env)
-  | (SplShow(SplList(n))) -> ((let p =
+  | (SplShow(SplList(n))) -> ((let () =
       (print_list n; print_string " ") in (SplList n)), env)
-  | (SplShow(SplString(n))) -> ((let p =
+  | (SplShow(SplString(n))) -> ((let () =
       (print_string n; print_string " ") in (SplString n)), env)
   | (SplShow(e1)) -> let (e1', env') = (eval env e1) in (SplShow(e1'), env')
 
-  | (SplShowLn(SplNumber n)) -> ((let p =
+  | (SplShowLn(SplNumber n)) -> ((let () =
       (print_int (int_of_float n); print_string "\n") in SplNumber(n)), env)
-  | (SplShowLn(SplBoolean n)) -> ((let p =
+  | (SplShowLn(SplBoolean n)) -> ((let () =
       (print_string (if n then "true\n" else "false\n")) in
         SplBoolean(n)), env)
-  | (SplShowLn(SplList(n))) -> ((let p =
+  | (SplShowLn(SplList(n))) -> ((let () =
       (print_list n; print_string "\n") in (SplList n)), env)
-  | (SplShowLn(SplString(n))) -> ((let p =
+  | (SplShowLn(SplString(n))) -> ((let () =
       (print_string n; print_string "\n") in (SplString n)), env)
-  | (SplShowLn(e1)) -> let (e1', env') = (eval env e1) in SplShowLn(e1'),env'
+  | (SplShowLn(e1)) -> let (e1', env') = (eval env e1) in
+  (SplShowLn(e1'),env')
 
   | (SplJustDo(e1, e2)) -> (
         let p,_ = (eval env e1) in
