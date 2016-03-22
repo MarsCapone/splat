@@ -547,9 +547,10 @@ let rec eval env e = match e with
   | ex -> raise Terminated 
 
 
-and eval_seq env n = print_string (list_to_string n); match n with
-    | expr :: [] -> print_string "\nevalling last\n\n"; eval env expr
-    | expr :: expr_lst -> print_string "\nevalling next\n"; (
+and eval_seq env n = match n with
+    | expr :: [] -> 
+        (if (isValue expr) then (expr, env) else (eval env expr)) 
+    | expr :: expr_lst -> (
         let _ = (eval env expr) in ();
         (eval_seq env expr_lst)
     )
@@ -571,7 +572,7 @@ let rec spl_to_string expr = match expr with
             "Function: "^(type_to_string (typeProg expr))
     | (SplList n) -> list_to_string n
     | (SplPlus (a, b)) -> (spl_to_string a)^" + "^(spl_to_string b)
-    | _ -> "other"
+
 
 let print_res res = match res with
     (*| (SplNumber i) -> print_int (int_of_float i) ; print_string " : Number"
