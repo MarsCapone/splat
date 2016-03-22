@@ -19,5 +19,4 @@ _build/
 setup.data
 setup.log
 
-src/main
-src/test1.spl
+mysplinterpreter
