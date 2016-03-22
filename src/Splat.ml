@@ -39,13 +39,10 @@ type splTerm =
     | SplHead of splTerm
     | SplTail of splTerm
     | SplEmptyList of splTerm
+    | SplStreamEnd of splTerm
 (* flow *)
     | SplJustDo of splTerm * splTerm
-    | SplFor of splTerm * splTerm * splTerm
-    | SplForever of splTerm
-    | SplWhile of splTerm * splTerm
     | SplIfElse of splTerm * splTerm * splTerm
-    | SplSwitch of splTerm * splTerm
 (* comparators *)
     | SplLt of splTerm * splTerm
     | SplGt of splTerm * splTerm
