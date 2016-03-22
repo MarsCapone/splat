@@ -13,6 +13,7 @@ type splType =
     SplatNumber
     | SplatBoolean
     | SplatString
+    | SplatStream
     | SplatList of splType
     | SplatFunction of splType * splType
 
@@ -22,6 +23,7 @@ type splTerm =
     | SplBoolean of bool
     | SplString of string
     | SplList of splTerm list
+    | SplStream of string Stream.t
     | SplVariable of string
 (* number operators *)
     | SplPlus of splTerm * splTerm
@@ -75,6 +77,7 @@ let rec isValue e = match e with
     | SplBoolean(b) -> true
     | SplString(s) -> true
     | SplList(l) -> true
+    | SplStream(s) -> true
     | SplAbs(rT, n, tT,x,e') -> true
     | _ -> false
 ;;
@@ -83,6 +86,7 @@ let rec type_to_string tT = match tT with
   | SplatNumber -> "Number"
   | SplatBoolean -> "Boolean"
   | SplatList(t) -> (type_to_string(t)^" List")
+  | SplatStream -> "Stream"
   | SplatString -> "String"
   | SplatFunction(tT1,tT2) -> "( "^type_to_string(tT1)^" -> "^type_to_string(tT2)^" )"
 ;;
@@ -144,6 +148,7 @@ let rec typeOf env e = match e with
         | SplString(s) :: _ -> SplatList (SplatString)
         | _ -> raise (TypeError "Invalid types: LIST")
     )
+    | SplStream (s) -> SplatStream 
 
     (*Boolean operators*)
     |SplAnd (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
@@ -530,8 +535,9 @@ let print_res res = match res with
     | (SplBoolean b) -> print_string (if b then "true" else "false") ; print_string " : Bool"
     | (SplString s) -> print_string (s^" : String")
     | (SplAbs(rT,n,tT,x,e)) -> print_string ("Function : "^type_to_string( typeProg (res) ))
-    | (SplList l) -> print_list l; print_string (" : "^type_to_string ( typeProg
-    res ))
+    | (SplList l) -> print_list l; print_string (" :
+        "^type_to_string ( typeProg res ))
+    | (SplStream s) -> print_string "Some sort of stream here!"
     (*Comment up to raise error to stop debugging*)
     (* | (SplApply(e1, e2)) -> print_string "apply"
     | (SplLet(e1, e2, e3)) -> print_string "let" *)

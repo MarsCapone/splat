@@ -30,7 +30,11 @@ rule lexer_main = parse
     | "true"   { TRUE }
     | "false"  { FALSE }
     | "stdin"  { STDIN }
-    | eof      { EOF }
+    | "strin"  { STREAMIN }
+    | "nextln" { STDIN_STREAMLINE }
+    | "strend" { STREAM_END }
+    | "lstend" { LIST_END }
+    | eof    { EOF }
 
 (*Operators*)
     | '+'      { PLUS }

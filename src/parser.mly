@@ -16,7 +16,7 @@
 %token APPLY
 /*Predefined*/
 %token TRUE FALSE
-%token STDIN
+%token STDIN STREAMIN STDIN_STREAMLINE STREAM_END LIST_END 
 %token EOF
 /*Comparators*/
 %token LESS_THAN LESS_THAN_EQUAL GREATER_THAN GREATER_THAN_EQUAL EQUAL_TO NOT_EQUAL_TO
@@ -105,6 +105,8 @@ expr:
     /*Stream / List Operations*/
     | expr CONS expr                { SplCons ($1, $3) }
     | EMPTY_LIST                    { SplList [] }
+    | EMPTY_STREAM                  { SplStream (
+        Stream.from (fun _ -> None)) }
     | HEAD expr                     { SplHead $2 }
     | TAIL expr                     { SplTail $2 }
     | STDIN                         { SplList (
@@ -114,6 +116,14 @@ expr:
             with End_of_file -> [] in
         readlines Pervasives.stdin ) }
 
+    | STREAMIN                         { SplStream( 
+        Stream.from (fun _ -> try Some (input_line Pervasives.stdin) with
+        End_of_file -> None) 
+    ) }
+    | STDIN_STREAMLINE              { SplString (
+        try input_line Pervasives.stdin with End_of_file -> "eof" ) }
+    | STREAM_END expr               { SplStreamEnd $2 }
+    | LIST_END expr                 { SplEmptyList $2 }
     | SPLIT expr                    { SplSplit $2 }
     | AS_NUM expr                   { SplAsNum $2 }
 
