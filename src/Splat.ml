@@ -148,14 +148,14 @@ let rec typeOf env e = match e with
     SplNumber (n) -> SplatNumber
     |SplBoolean (b) -> SplatBoolean
     |SplString (s) -> SplatString
-    |SplList (l) -> (match l with 
+    |SplList (l) -> (match l with
         [] -> SplatList (SplatNumber)
         | SplNumber(n) :: _ -> SplatList (SplatNumber)
         | SplBoolean(b) :: _ -> SplatList (SplatBoolean)
         | SplString(s) :: _ -> SplatList (SplatString)
         | _ -> raise (TypeError "Invalid types: LIST")
     )
-    | SplStream (s) -> SplatStream 
+    | SplStream (s) -> SplatStream
 
     (*Boolean operators*)
     |SplAnd (e1,e2) -> (match (typeOf env e1) , (typeOf env e2) with
@@ -247,7 +247,7 @@ let rec typeOf env e = match e with
 type do not match")
     )
     | SplHead (e1) -> (
-        match (typeOf env e1) with 
+        match (typeOf env e1) with
             SplatList(n) -> n
             | _ -> raise (TypeError "Invalid type: HEAD parameter is not a list")
     )
@@ -260,17 +260,17 @@ type do not match")
 
     | SplStreamEnd (e1) -> (
         match (typeOf env e1) with
-            SplatString -> SplatBoolean 
+            SplatString -> SplatBoolean
             | SplatNumber -> SplatBoolean
             | t -> raise (TypeError ("Invalid type: Stream End can only be String, not "^(type_to_string(t))))
     )
 
     | SplEmptyList (e1) -> (
         match (typeOf env e1) with
-            SplatList(n) -> SplatBoolean 
+            SplatList(n) -> SplatBoolean
             | t -> raise (TypeError ("Invalid type: EMPTYLIST "^type_to_string(t)))
     )
-    
+
     (*Flow control*)
     |SplIfElse(e1, e2, e3) -> (
         let ty1 = typeOf env e1 in
@@ -397,9 +397,9 @@ let rec eval env e = match e with
   | (SplBoolean b) -> raise Terminated
   | (SplString s) -> raise Terminated
   | (SplList l) -> raise Terminated
-  | (SplStream s) -> raise Terminated 
+  | (SplStream s) -> raise Terminated
   | (SplAbs (rT, n, tT,x,e')) -> raise Terminated
-  
+
   (*Boolean operators*)
   | (SplAnd(SplBoolean(n),SplBoolean(m))) -> (SplBoolean( n && m ) , env)
   | (SplAnd(SplBoolean(n), e2))      -> let (e2',env') = (eval env e2) in (SplAnd(SplBoolean(n),e2'),env')
@@ -476,8 +476,7 @@ let rec eval env e = match e with
   | (SplHead(SplList(n))) -> (match n with
         h :: _ when (isValue h) -> (h, env)
         | [] -> (SplList(n), env)
-        | _ -> raise (SyntaxError ("Cannot take HEAD of unrecognised expression
-        "^Pervasives.__LOC__))
+        | _ -> raise (SyntaxError ("Cannot take HEAD of unrecognised expression"))
   )
   | (SplHead(e1)) -> let (e1', env') = (eval env e1) in (SplHead (e1'), env')
 
@@ -486,28 +485,28 @@ let rec eval env e = match e with
         | [] -> raise (OutOfBounds "At end of list, cannot take tail")
     )
   | (SplTail(e1)) -> let (e1', env') = (eval env e1) in (SplTail(e1'), env')
-  
+
   | (SplStreamEnd (SplString(e1))) -> (SplBoolean ( e1 = "eof" ), env)
   | (SplStreamEnd (SplNumber(e1))) -> (SplBoolean ( e1 = Pervasives.nan ), env)
   | (SplStreamEnd (e1)) -> let (e1', env') = (eval env e1) in (SplStreamEnd
         (e1'), env')
 
   | (SplEmptyList (SplList(e1))) -> (SplBoolean ( e1 = [] ), env)
-  | (SplEmptyList (e1)) -> let (e1', env') = (eval env e1) in 
+  | (SplEmptyList (e1)) -> let (e1', env') = (eval env e1) in
         (SplEmptyList(e1'), env')
 
   (*Assignment*)
-  | (SplLet(n, m, e3)) when (isValue(m)) -> 
+  | (SplLet(n, m, e3)) when (isValue(m)) ->
           (eval_seq (addBinding env n m) e3)
   | (SplLet(n, m, e3)) -> let (m', env') = (eval env m) in (SplLet(n, m', e3), env')
 
   | (SplApply(SplAbs(rT,n,tT,x,e), e2)) when (isValue (e2)) -> (
-      let env' = (addBinding 
-        (addBinding env n (SplAbs(rT,n,tT,x,e))) x e2) in 
+      let env' = (addBinding
+        (addBinding env n (SplAbs(rT,n,tT,x,e))) x e2) in
       (eval_seq env' e)
   )
   | (SplApply(SplAbs(rT, n, tT, x, e), e2)) ->
-          let (e2', env') = (eval env e2) in 
+          let (e2', env') = (eval env e2) in
           (SplApply(SplAbs(rT, n, tT, x, e), e2'), env)
   | (SplApply(e1,e2)) -> let (e1',env') = (eval env e1) in (SplApply(e1',e2), env')
 
@@ -538,18 +537,18 @@ let rec eval env e = match e with
   | (SplSplit(SplString(s)))    -> ((split s), env)
   | (SplSplit(s))               -> let (s', env') = (eval env s) in (SplSplit(s'), env')
 
-  | (SplAsNum(SplString(s)))    -> (match (String.lowercase s) with 
+  | (SplAsNum(SplString(s)))    -> (match (String.lowercase s) with
         "eof" -> (SplNumber(Pervasives.nan), env)
         | _ -> (SplNumber (float_of_string s), env)
   )
   | (SplAsNum(s))               -> let (s', env') = (eval env s) in (SplAsNum(s'), env')
 
-  | ex -> raise Terminated 
+  | ex -> raise Terminated
 
 
 and eval_seq env n = match n with
-    | expr :: [] -> 
-        (if (isValue expr) then (expr, env) else (eval env expr)) 
+    | expr :: [] ->
+        (if (isValue expr) then (expr, env) else (eval env expr))
     | expr :: expr_lst -> (
         let _ = (eval env expr) in ();
         (eval_seq env expr_lst)
@@ -557,8 +556,8 @@ and eval_seq env n = match n with
     | x -> raise (FunctionError "No function body")
 ;;
 
-let rec evalloop env e = try (let (e',env') = (eval env e) in 
-    (evalloop env' e')) with Terminated -> 
+let rec evalloop env e = try (let (e',env') = (eval env e) in
+    (evalloop env' e')) with Terminated ->
         if (isValue e) then e else e (*raise (StuckTerm e)*) ;;
 let evalProg e = evalloop (Env []) e ;;
 
@@ -569,7 +568,7 @@ let rename (s:string) = s^"'";;
     | (SplNumber n) -> string_of_float n
     | (SplBoolean n) -> string_of_bool n
     | (SplString n) -> n
-    | (SplAbs (a, b, c, d, e)) -> 
+    | (SplAbs (a, b, c, d, e)) ->
             "Function: "^(type_to_string (typeProg expr))
     | (SplList n) ->  n
     | (SplPlus (a, b)) -> (spl_to_string a)^" + "^(spl_to_string b)
