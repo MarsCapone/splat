@@ -1,0 +1,15 @@
+function number pr7 (string list splat) {
+    if lstend splat {
+        0
+    } else {
+        let [first = head (split (head splat))] {
+            let [second = head (tail (split (head splat)))] {
+                let [s = show ((num first) - (num second))] {
+                    let [t = showln first] {
+                        pr7 #(tail splat)
+                    }
+                }
+            }
+        }
+    }
+} #stdin

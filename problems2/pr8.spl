@@ -1,0 +1,14 @@
+function number pr8 (number list splat) {
+    function number pr6p2 (number previous) {
+        if lstend (tail splat) {
+            <| there is only one element |>
+            0
+        } else {
+            let [h = num (head splat)] {
+                let [t = showln (h + previous)] {
+                    pr8 #(tail splat) #h
+                }
+            }
+        }
+    }
+} #stdin #0
