@@ -1,0 +1,25 @@
+Problem 9 - Natural Numbers
+
+Take a sequence a1, a2, a3, a4, a5, ... and output:
+
+a1
+2*a1 + a2 
+3*a1 + 2*a2 + a3
+4*a1 + 3*a2 + 2*a3 + a4
+5*a1 + 4*a2 + 3*a3 + 2*a4 + a5
+
+IN  | OUT
+--------
+1   | 1
+0   | 2
+0   | 3
+0   | 4
+
+
+STREAM      | RESULT        | PREVIOUS_LIST     | PREVIOUS COUNT
+            |               | []                | pc = 1
+a, b, c, .. | a * pc        | [a]               | pc = 2
+b, c, d, .. | (a * pc) + (b * (pc-1))  
+                            | [b, a]            | pc = 3
+c, d, e, .. | (a * pc) + (b * (pc-1)) + (c * (pc-2)) ...
+                            | [c, b, a]
