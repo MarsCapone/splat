@@ -23,3 +23,11 @@ b, c, d, .. | (a * pc) + (b * (pc-1))
                             | [b, a]            | pc = 3
 c, d, e, .. | (a * pc) + (b * (pc-1)) + (c * (pc-2)) ...
                             | [c, b, a]
+
+
+
+1. take the head of the stream, add it to the previous list.
+2. take the new list and return the sum of looping through and multiplying by the previous count, which is decremented each time. stop when the pc reaches 0.
+3. show this value and call the function again on the rest of the stream
+
+function stream, prevlst, count

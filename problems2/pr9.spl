@@ -1,0 +1,23 @@
+function number pr9 (number list splat) {
+    function number m (number list pl) {
+        function number n (number count) {
+            function number o (number res) {
+                if lstend splat {
+                    0
+                } else {
+                    if lstend pl {
+                        let [s = showln res] {
+                            pr9 #(tail splat) #((num (head splat)) :: pl) #(count + 1) #0
+                        }
+                    } else {
+                        let [r = (m #(tail pl) #(count - 1) #(res + (count * (head pl))))] {
+                            pr9 #(tail splat) #((num (head splat)) :: pl) #(count + 1) #0
+                        }
+                    }
+                }
+            }
+        }
+    }
+} #stdin #[] #0 #0
+
+                    
