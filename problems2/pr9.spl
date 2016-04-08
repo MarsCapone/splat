@@ -1,23 +1,22 @@
 function number pr9 (number list splat) {
-    function number m (number list pl) {
-        function number n (number count) {
-            function number o (number res) {
-                if lstend splat {
-                    0
-                } else {
-                    if lstend pl {
-                        let [s = showln res] {
-                            pr9 #(tail splat) #((num (head splat)) :: pl) #(count + 1) #0
-                        }
-                    } else {
-                        let [r = (m #(tail pl) #(count - 1) #(res + (count * (head pl))))] {
-                            pr9 #(tail splat) #((num (head splat)) :: pl) #(count + 1) #0
-                        }
-                    }
+    function number p2 (number list prevn) {
+        function number p3 (number count) {
+            if lstend splat {
+                0
+            } else {
+                let [r = showln (   function number adder (number list prl) {
+                                        function number i (number cc) {
+                                            if cc > count {
+                                                0
+                                            } else {
+                                                ((head prl) * cc) + (adder #(tail prl) #(cc+1))
+                                            }
+                                        }
+                                    } #prevn #1 )] {
+                    pr9 #(tail splat) #((num (head splat)) :: prevn) #(count + 1)
                 }
             }
         }
     }
-} #stdin #[] #0 #0
+} #stdin #[] #0
 
-                    
