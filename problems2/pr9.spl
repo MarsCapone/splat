@@ -4,7 +4,7 @@ function number pr9 (number list splat) {
             if lstend splat {
                 0
             } else {
-                let [r = showln (   function number adder (number list prl) {
+                let [f = (   function number adder (number list prl) {
                                         function number i (number cc) {
                                             if cc > count {
                                                 0
@@ -12,8 +12,10 @@ function number pr9 (number list splat) {
                                                 ((head prl) * cc) + (adder #(tail prl) #(cc+1))
                                             }
                                         }
-                                    } #prevn #1 )] {
-                    pr9 #(tail splat) #((num (head splat)) :: prevn) #(count + 1)
+                                    } )] {
+                    let [r = showln (f #prevn #1)] {
+                        pr9 #(tail splat) #((num (head splat)) :: prevn) #(count + 1)
+                    }
                 }
             }
         }
