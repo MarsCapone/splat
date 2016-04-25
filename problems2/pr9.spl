@@ -1,24 +1,15 @@
-function number pr9 (number list splat) {
-    function number p2 (number list prevn) {
-        function number p3 (number count) {
-            if lstend splat {
+function number natural (number list input) {
+    function number accumulate (number acc) {
+        function number last (number last) {
+            if (lstend input) {
                 0
             } else {
-                let [f = (   function number adder (number list prl) {
-                                        function number i (number cc) {
-                                            if cc > count {
-                                                0
-                                            } else {
-                                                ((head prl) * cc) + (adder #(tail prl) #(cc+1))
-                                            }
-                                        }
-                                    } )] {
-                    let [r = showln (f #prevn #1)] {
-                        pr9 #(tail splat) #((num (head splat)) :: prevn) #(count + 1)
+                let [a = (acc + (num (head input)))] {
+                    let [print = showln (last + a)] {
+                        natural #(tail input) #a #(last + a)
                     }
                 }
             }
         }
     }
-} #stdin #[] #0
-
+} #stdin #0 #0

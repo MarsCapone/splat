@@ -1,0 +1,17 @@
+function number delayed (number list input) {
+    function number nm1 (number m1) {
+        function number nm2 (number m2) {
+            if (lstend input) {
+                0
+            } else {
+                let [out = ((num (head input)) + m2)] {
+                    let [ print = showln out ] {
+                        let [m = m1] {
+                            delayed #(tail input) #out #m
+                        }
+                    }
+                }
+            }
+        }
+    }
+} #stdin #0 #0
