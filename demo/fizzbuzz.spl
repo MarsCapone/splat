@@ -1,29 +1,31 @@
-function number fizzbuzz (list splat) {
-    if (head splat) == [] { 
-        0 
-    } else {
-        let [h = (num (head splat)) ] {
-            if (h % 3 == 0) and (h % 5 == 0) { 
-                let [ s = (showln "fizzbuzz") ] {
-                    fizzbuzz #(tail splat) 
-                } 
-            } else { 
-                if h % 3 == 0 { 
-                    let [ t = (showln "fizz") ] {
-                        fizzbuzz #(tail splat)
-                    } 
-                } else { 
-                    if h % 5 == 0 { 
-                        let [ u = (showln "buzz") ] {
-                            fizzbuzz #(tail splat) 
-                        } 
-                    } else { 
-                        let [ v = (showln h) ] {
-                            fizzbuzz #(tail splat) 
-                        } 
-                    } 
-                } 
-            } 
-        } 
-    } 
-} #stdin
+function number fizzbuzz (number max) {
+    function number looper (number c) {
+        if (c == max) {
+            0
+        } else {
+            let [n = c + 1] {
+                if ( c % 15 == 0 ) {
+                    let [a = showln "fizzbuzz"] {
+                        looper #n
+                    }
+                } else {
+                    if ( c % 5 == 0 ) {
+                        let [a = showln "buzz"] {
+                            looper #n
+                        }
+                    } else {
+                        if ( c % 3 == 0 ) {
+                            let [a = showln "fizz"] {
+                                looper #n
+                            }
+                        } else {
+                            let [a = showln c] {
+                                looper #n
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+} #100 #1
