@@ -1,0 +1,11 @@
+function number reverse (number list splat) {
+    function number r2 (number list ret) {
+        if lstend splat {
+            ret
+        } else {
+            let [h = head splat] {
+                reverse #(tail splat) #(h::ret)
+            }
+        }
+    }
+} #stdin #[]
