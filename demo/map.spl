@@ -1,0 +1,41 @@
+let [reverse = 
+    function number list r (number list lst) {
+        function number list r2 (number list ret) {
+            if lstend lst {
+                ret
+            } else {
+                let [h = head lst] {
+                    r #(tail lst) #(h::ret)
+                }
+            }
+        }
+    }
+] { 
+    let [map = 
+    
+        function number list mapf (number list l) {
+            function number list m2 (number list l2) {
+                function number list m3 (function number (number) f) {
+                    if lstend l {
+                        reverse #l2 #[]
+                    } else {
+                        let [nextval = f #(head l)] {
+                            mapf #(tail l) #(nextval :: l2) #f
+                        }
+                    }
+                }
+            }
+        }
+    ] {
+
+        <| actual body |>
+        let [add5 = 
+            function number f (number n) {
+                n + 5
+            }
+        ] {
+            map #(1::2::3::4::5::[]) #[] #add5
+        }
+    }
+}
+
