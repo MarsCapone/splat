@@ -1,0 +1,6 @@
+{
+  "name": "Splat",
+  "tagline": "",
+  "body": "# splat\r\n*By Samson Danziger & Oliver Steptoe*\r\n\r\nA functional language operating on streams (ish). In fact this language operates on lists, but we'll ignore that detail.\r\n\r\nA full language reference can be found in `splat-user-manual.pdf`.\r\n\r\n## Using Splat\r\n\r\n1. Clone the repo\r\n2. Run `make`\r\n3. `./mysplinterpreter [filename]` or `./mysplinterpreter [filename] < [input file]`  \r\n  For example: `/mysplinterpreter problems/pr1.spl < problems/task1nums`\r\n\r\n## Syntax themes\r\nThere are currently a few syntax themes for Splat.\r\n\r\n| Editor | Link |\r\n| ------ | ---- |\r\n| Atom | https://atom.io/packages/language-splat |\r\n| Vim | http://www.vim.org/scripts/script.php?script_id=5380 |\r\n\r\n\r\n\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
