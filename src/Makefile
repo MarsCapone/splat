@@ -30,7 +30,7 @@ include .depend
 # Build an executable typechecker
 main: $(OBJS) main.cmo
 	@echo Linking $@
-	ocamlc -o ../mysplinterpreter -g $(COMMONOBJS) $(OBJS)
+	ocamlc -o ../splat -g $(COMMONOBJS) $(OBJS)
 
 # Compile an ML module interface
 %.cmi : %.mli
