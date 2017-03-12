@@ -9,8 +9,8 @@ A full language reference can be found in `splat-user-manual.pdf`.
 
 1. Clone the repo
 2. Run `make`
-3. `./mysplinterpreter [filename]` or `./mysplinterpreter [filename] < [input file]`  
-  For example: `/mysplinterpreter problems/pr1.spl < problems/task1nums`
+3. `./splat [filename]` or `./splat [filename] < [input file]`  
+  For example: `./splat problems/pr1.spl < problems/task1nums`
 
 ## Syntax themes
 There are currently a few syntax themes for Splat.
